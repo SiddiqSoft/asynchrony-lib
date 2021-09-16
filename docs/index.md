@@ -1,37 +1,21 @@
-## Welcome to GitHub Pages
+basic-worker : Asynchrony support library
+-------------------------------------------
 
-You can use the [editor on GitHub](https://github.com/SiddiqSoft/basic-worker/edit/main/docs/index.md) to maintain and preview the content for your website in Markdown files.
+<!-- badges -->
+[![CodeQL](https://github.com/SiddiqSoft/basic-worker/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/SiddiqSoft/basic-worker/actions/workflows/codeql-analysis.yml)
+[![Build Status](https://dev.azure.com/siddiqsoft/siddiqsoft/_apis/build/status/SiddiqSoft.basic-worker?branchName=main)](https://dev.azure.com/siddiqsoft/siddiqsoft/_build/latest?definitionId=00&branchName=main)
+![](https://img.shields.io/nuget/v/SiddiqSoft.basic-worker)
+![](https://img.shields.io/github/v/tag/SiddiqSoft/basic-worker)
+![](https://img.shields.io/azure-devops/tests/siddiqsoft/siddiqsoft/00)
+<!--![](https://img.shields.io/azure-devops/coverage/siddiqsoft/siddiqsoft/00)-->
+<!-- end badges -->
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+# Getting started
 
-### Markdown
+- This library uses Windows code and requires VS 2019 v16.11.2 or better.
+- On Windows with VisualStudio, use the Nuget package! 
+- Make sure you use `c++latest` as the `<format>` is no longer in the `c++20` option pending ABI resolution.
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+> **NOTE**
+> We are going to track VS 2022 and make full use of C++20 facilities and the API is subject to change.
 
-```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/SiddiqSoft/basic-worker/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
