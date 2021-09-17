@@ -47,7 +47,7 @@ namespace siddiqsoft
     /// @remarks The number of threads in the pool is determined by the nature of your "work". If you're spending time against db
     /// then you might wish to use more threads as individual queries might take time and hog the thread.
     template <typename T, uint16_t N = 0>
-        requires std::copy_constructible<T> && std::move_constructible<T>
+        requires std::move_constructible<T>
     struct roundrobin_pool
     {
         roundrobin_pool(roundrobin_pool&&) = delete;
@@ -82,7 +82,7 @@ namespace siddiqsoft
             // Increment counter *before* we invoke nextWorkerIndex..
             ++queueCounter;
             // Add into the thread's internal queue
-            workers[nextWorkerIndex()].queue(std::move(item));
+            workers.at(nextWorkerIndex()).queue(std::move(item));
         }
 
 #ifdef _DEBUG

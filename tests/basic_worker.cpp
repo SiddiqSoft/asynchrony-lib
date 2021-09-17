@@ -59,3 +59,54 @@ TEST(basic_worker, test1)
     std::this_thread::sleep_for(std::chrono::seconds(1));
     EXPECT_TRUE(passTest);
 }
+
+
+TEST(basic_worker, test2)
+{
+    bool                                                      passTest {false};
+
+    siddiqsoft::basic_worker<std::shared_ptr<nlohmann::json>> worker {[&](auto& item) {
+        std::cerr << std::format("Got object: {}\n", item->dump());
+        passTest = true;
+    }};
+
+    worker.queue(std::make_shared<nlohmann::json>(nlohmann::json {{"hello", "world"}}));
+
+    // This is important otherwise the destructor will kill the thread before it has a chance to process anything!
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    EXPECT_TRUE(passTest);
+}
+
+
+TEST(basic_worker, test3)
+{
+    bool passTest {false};
+
+    struct nonCopyableObject
+    {
+        std::string Data {};
+
+        nonCopyableObject(const std::string& s)
+            : Data(s)
+        {
+        }
+
+        nonCopyableObject(nonCopyableObject&) = delete;
+        nonCopyableObject& operator=(nonCopyableObject&) = delete;
+
+        // Move constructors
+        nonCopyableObject(nonCopyableObject&&) = default;
+        nonCopyableObject& operator=(nonCopyableObject&&) = default;
+    };
+
+    siddiqsoft::basic_worker<nonCopyableObject> worker {[&](auto& item) {
+        std::cerr << std::format("Got object: {}\n", item.Data);
+        passTest = true;
+    }};
+
+    worker.queue(nonCopyableObject { "Hello world!"});
+
+    // This is important otherwise the destructor will kill the thread before it has a chance to process anything!
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    EXPECT_TRUE(passTest);
+}

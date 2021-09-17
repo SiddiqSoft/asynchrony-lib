@@ -49,7 +49,7 @@ namespace siddiqsoft
     /// @remarks The number of threads in the pool is determined by the nature of your "work". If you're spending time against db
     /// then you might wish to use more threads as individual queries might take time and hog the thread.
     template <typename T, uint16_t N = 0>
-        requires std::copy_constructible<T> && std::move_constructible<T>
+        requires std::move_constructible<T>
     struct basic_pool
     {
          /// @brief Destructor.

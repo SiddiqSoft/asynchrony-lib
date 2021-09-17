@@ -53,7 +53,7 @@ TEST(basic_pool, test1)
         passTest++;
     }};
 
-    for (auto i = 0; i < std::thread::hardware_concurrency(); i++) {
+    for (unsigned i = 0; i < std::thread::hardware_concurrency(); i++) {
         workers.queue({{"test", "basic_pool"}, {"hello", "world"}, {"i", i}});
     }
 

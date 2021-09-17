@@ -53,10 +53,8 @@ namespace siddiqsoft
     /// @tparam T The data type for this processor
     /// @tparam Pri Optional thread priority level. 0=Normal
     template <typename T, uint16_t Pri = 0>
-        requires ((Pri >= -10) && (Pri <= 10)) &&
-                 std::copy_constructible<T>&&
-                 std::move_constructible<T>
-    struct basic_worker
+        requires((Pri >= -10) && (Pri <= 10))
+    &&std::move_constructible<T> struct basic_worker
     {
         basic_worker(basic_worker&) = delete;
         auto operator=(basic_worker&) = delete;
@@ -90,7 +88,7 @@ namespace siddiqsoft
 
         /// @brief Constructor requires the callback for the thread
         /// @param c The callback which accepts the type T as reference and performs action.
-        basic_worker(std::function<void(T&)> c) noexcept
+        basic_worker(std::function<void(T&)> c) 
             : callback(c)
         {
         }
@@ -135,25 +133,75 @@ namespace siddiqsoft
 
             while (!st.stop_requested()) {
                 try {
-                    if (signal.try_acquire_for(signalWaitInterval)) {
-                        // Guard against empty signals which are terminating indicator
-                        if (!items.empty() && !st.stop_requested()) {
-                            T item;
-
-                            { // scope lock to pull item from the deque
-                                std::unique_lock<std::shared_mutex> myWriterLock(items_mutex);
-                                item = items.front();
-                                items.pop_front();
-                            } // end of lock
-                            // Delegate to the callback outside the lock
-                            callback(item);
-                        }
+                    // The getNextItem performs the wait on the signal and if it expires, returns empty.
+                    // If there is an item, it will get that item (minimizing move) and performs the pop
+                    // and returns the item so we can invoke the callback outside the lock.
+                    if (auto item = getNextItem(signalWaitInterval); item && !st.stop_requested()) {
+                        // Delegate to the callback outside the lock
+                        callback(*item);
                     }
                 }
                 catch (...) {
                 }
             } // while ..continue until we're asked to stop
         }};
+
+        /// @brief This helper exists ONLY to ensure that we avoid making a copy and pop item from the deque.
+        /// @notes CAUTION. If you do not call pop() then the destructor will
+        /// throw away the item when it is invoked.
+        /// This structure is private and it is intended to be used as a helper
+        /// to ensure we pop the queue item to avoid making copies and invoking
+        /// callback inside the lock.
+        struct popOnDestruct
+        {
+            /// @brief Constructor holds references to the underlying deque and the mutex. When the
+            /// @param items The reference to the deque
+            /// @param items_mutex The reference to the mutex
+            explicit popOnDestruct(std::deque<T>& items, std::shared_mutex& items_mutex) noexcept
+                : parentDeque(items)
+                , parentMutex(items_mutex)
+            {
+            }
+
+            /// @brief Returns the item at the front of the deque inside lock
+            /// @return Item
+            T pop()
+            {
+                std::unique_lock<std::shared_mutex> myWriterLock(parentMutex);
+                return std::move(parentDeque.front());
+            }
+
+            /// @brief Pop the front of the queue upon destructor invocation
+            ~popOnDestruct() noexcept
+            {
+                if (!parentDeque.empty()) parentDeque.pop_front();
+            }
+
+        private:
+            std::deque<T>&     parentDeque; // reference to the parent deque
+            std::shared_mutex& parentMutex; // reference to the parent mutex
+        };
+
+        /// @brief Performs an acquire on the semaphore and if successful,
+        /// attempts to lock to pull the item from the top of the deque.
+        /// @param delta Amount of milliseconds to wait on the semaphore
+        /// @return An optional which may contain the item or empty (most of the time it'll be empty)
+        std::optional<T> getNextItem(std::chrono::milliseconds& delta)
+        {
+            if (signal.try_acquire_for(signalWaitInterval)) {
+                // Guard against empty signals which are terminating indicator
+                if (!items.empty()) {
+                    // Ensures that we pop_front upon exit of this scope
+                    popOnDestruct pod {items, items_mutex};
+                    // The pop() method gets the front item within lock and gets back the item
+                    return pod.pop();
+                    // The item is now pop'd due to the destructor invoked by popOnDestruct
+                }
+            }
+
+            // Fall-through empty
+            return {};
+        }
     };
 } // namespace siddiqsoft
 

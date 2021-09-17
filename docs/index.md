@@ -34,7 +34,6 @@ Utility | Description
 ```cpp
     template <typename T, uint16_t Pri = 0>
         requires ((Pri >= -10) && (Pri <= 10)) &&
-                 std::copy_constructible<T> &&
                  std::move_constructible<T>
     struct basic_worker
     {
@@ -61,7 +60,7 @@ Utility | Description
 
 ```cpp
     template <typename T, uint16_t N = 0>
-        requires std::copy_constructible<T> && std::move_constructible<T>
+        requires std::move_constructible<T>
     struct basic_pool
     {
         ~basic_pool();
@@ -84,7 +83,7 @@ Utility | Description
 
 ```cpp
     template <typename T, uint16_t N = 0>
-        requires std::copy_constructible<T> && std::move_constructible<T>
+        requires std::move_constructible<T>
     struct roundrobin_pool
     {
         roundrobin_pool(roundrobin_pool&&) = delete;

@@ -10,7 +10,9 @@ asynchrony : Add asynchrony to your apps
 <!-- end badges -->
 
 # Motivation
-- We needed to add asynchrony to our code. The minimal effort seemed reasonable "packagable" into a header file.
+- We needed to add asynchrony to our code.
+- The code here is a set of helpers that utilize the underlying deque, semaphore, mutex features found in std.
+- Be instructive while providing functional code
 - Use only C++20 standard code: jthread, deque, semaphore, barriers and latch
 - No external dependency
 
@@ -18,7 +20,7 @@ asynchrony : Add asynchrony to your apps
 
 Refer to the [documentation](https://siddiqsoft.github.io/asynchrony-lib/) for details.
 
-The library uses concepts to ensure the type `T` meets copy and move construct requirements.
+The library uses concepts to ensure the type `T` meets move construct requirements.
 
 ## Single threaded worker
 
