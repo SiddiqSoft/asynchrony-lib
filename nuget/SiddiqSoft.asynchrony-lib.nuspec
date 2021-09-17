@@ -8,12 +8,12 @@
 	-->
 	<metadata>
 		<!-- required: -->
-		<id>SiddiqSoft.RWLContainer</id>
+		<id>SiddiqSoft.asynchrony-lib</id>
 		<version>$VERSION$</version>
 		<authors>SiddiqSoft</authors>
-		<description>stdcpp reader-writer lock container class</description>
-		<tags>unique_lock shared_lock reader-writer container lock native nativepackage cpp</tags>
-		<projectUrl>https://github.com/SiddiqSoft/RWLContainer</projectUrl>
+		<description>Add asynchrony to your apps</description>
+		<tags>jthread thread async pool deque cpp20 native nativepackage cpp</tags>
+		<projectUrl>https://github.com/SiddiqSoft/asynchrony-lib</projectUrl>
 		<requireLicenseAcceptance>true</requireLicenseAcceptance>
 		<license type="expression">BSD-3-Clause</license>
     <icon>docs\Siddiq-Software-Avatar.png</icon>
@@ -38,6 +38,6 @@
 		<file src="..\README.md" target="docs\" />
     
 		<!-- MSBuild .targets files -->
-		<file src="SiddiqSoft.RWLContainer.targets" target="build\native" />
+		<file src="SiddiqSoft.asynchrony-lib.targets" target="build\native" />
 	</files>
 </package>
