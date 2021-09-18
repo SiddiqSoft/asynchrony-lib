@@ -33,10 +33,10 @@
  */
 
 #pragma once
-#ifndef BASIC_POOL_HPP
-#define BASIC_POOL_HPP
+#ifndef SIMPLE_POOL_HPP
+#define SIMPLE_POOL_HPP
 
-#include "basic_worker.hpp"
+#include "simple_worker.hpp"
 #include <optional>
 #include <latch>
 
@@ -50,18 +50,18 @@ namespace siddiqsoft
     /// then you might wish to use more threads as individual queries might take time and hog the thread.
     template <typename T, uint16_t N = 0>
         requires std::move_constructible<T>
-    struct basic_pool
+    struct simple_pool
     {
-        basic_pool(basic_pool&&) = delete;
-        basic_pool& operator=(basic_pool&&) = delete;
-        basic_pool(basic_pool&)             = delete;
-        basic_pool& operator=(basic_pool&) = delete;
+        simple_pool(simple_pool&&) = delete;
+        simple_pool& operator=(simple_pool&&) = delete;
+        simple_pool(simple_pool&)             = delete;
+        simple_pool& operator=(simple_pool&) = delete;
 
 
         /// @brief Destructor.
         /// @remarks We need to make sure that the signal wait interval is reduced to 1ms to allow our thread (which are waiting on
         /// the signal) can be stopped.
-        ~basic_pool()
+        ~simple_pool()
         {
             // Reduce the wait interval to ensure that the threads waiting on the signal abort
             signalWaitInterval = std::chrono::milliseconds(0);
@@ -78,7 +78,7 @@ namespace siddiqsoft
 
         /// @brief Contructs a threadpool with N threads with the given callback/worker function
         /// @param c The worker function.
-        basic_pool(std::function<void(T&)> c)
+        simple_pool(std::function<void(T&)> c)
             : callback(c)
         {
             // *CRITICAL*
@@ -133,12 +133,14 @@ namespace siddiqsoft
         /// @brief Serializer for json
         /// @param  destination
         /// @param  this object
+        /// @note The use of signal.max() is causing an issue where winmindef.h is defining the `max` as a macro and thus we end up
+        /// with compiler error when the client application includes any of the windows headers! Disabled for now.
         nlohmann::json toJson() const
         {
-            return {{"_typver", "siddiqsoft.asynchrony-lib.basic_pool/0.8"},
+            return nlohmann::json{{"_typver", "siddiqsoft.asynchrony-lib.simple_pool/0.9"},
                     {"workersSize", workers.size()},
                     {"dequeSize", items.size()},
-                    {"semaphoreMax", signal.max()},
+                    //{"semaphoreMax", signal.max()}, // conflicts with windows headers :-(
                     {"queueCounter", queueCounter.load()},
                     {"waitInterval", signalWaitInterval.count()}};
         }
@@ -164,12 +166,12 @@ namespace siddiqsoft
     };
 
 #if defined(NLOHMANN_JSON_VERSION_MAJOR)
-    /// @brief Serializer for the basic_worker
+    /// @brief Serializer for the simple_worker
     /// @tparam T base typename
     /// @param dest destination json object
     /// @param src source object
     template <typename T, uint16_t N = 0>
-    static void to_json(nlohmann::json& dest, const siddiqsoft::basic_pool<T, N>& src)
+    static void to_json(nlohmann::json& dest, const siddiqsoft::simple_pool<T, N>& src)
     {
         dest = src.toJson();
     }

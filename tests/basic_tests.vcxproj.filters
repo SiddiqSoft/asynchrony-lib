@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="simple_pool.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="simple_worker.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="roundrobin_pool.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="periodic_worker.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{043188af-fc99-43ee-a7a1-86344dc7801a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

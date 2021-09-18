@@ -67,7 +67,7 @@ TEST(roundrobin_pool, test1)
 
 TEST(roundrobin_pool, test2)
 {
-    const auto                FEEDER_COUNT = 8;
+    constexpr auto            FEEDER_COUNT = 8;
     std::barrier              startFeeding {FEEDER_COUNT};
     constexpr auto            WORKER_POOLSIZE = 8 * FEEDER_COUNT;
     std::atomic_uint          passTest {0};

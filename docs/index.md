@@ -23,28 +23,39 @@ asynchrony : Asynchrony support library
 
 # API
 
-Utility | Description
---------|------------
-[`siddiqsoft::basic_worker`](#siddiqsoftbasic_worker) | Provides for a single thread with an internal deque.<br/>You'd use this to immediately make any "long" task asynchronous.<br/>Use instead of `std::async`.<br/>Just register your callback/lambda and you're done. No need to worry about waiting for the result (no worry about futures or waiting on them).<br/>Your declared callback will be invoked!
-[`siddiqsoft::basic_pool`](#siddiqsoftbasic_pool) | Implements an array of threads backed with a *single* deque. Each thread waits for and processes the next available item from the single deque.
+Utility                   | Description
+-------------------------:|:------------
+[`siddiqsoft::simple_worker`](#siddiqsoftsimple_worker) | Provides for a single thread with an internal deque.<br/>You'd use this to immediately make any "long" task asynchronous.<br/>Use instead of `std::async`.<br/>Just register your callback/lambda and you're done. No need to worry about waiting for the result (no worry about futures or waiting on them).<br/>Your declared callback will be invoked!
+[`siddiqsoft::simple_pool`](#siddiqsoftsimple_pool) | Implements an array of threads backed with a *single* deque. Each thread waits for and processes the next available item from the single deque.
 [`siddiqsoft::roundrobin_pool`](#siddiqsoftroundrobin_pool) | Implements an vector of basic_workers (each worker has its independent queue therefore minimizing contention time).<br/>The queue method implements a running counter based round-robin feeder.
+[`siddiqsoft::periodic_worker`](#siddiqsoftperiodic_worker) | Provides a facility where you can have your function/lambda invoked at a given periodic rate (in microseconds).
 
-## `siddiqsoft::basic_worker`
+<hr/>
+
+## `siddiqsoft::simple_worker`
+
+Provides for a single thread with an internal deque.
+
+You'd use this to immediately make any "long" task asynchronous where you do not need `std::future` and `std::async`.
+
+Just register your callback/lambda and you're done. No need to worry about waiting for the result (no worry about futures or waiting on them).
 
 ```cpp
     template <typename T, uint16_t Pri = 0>
         requires ((Pri >= -10) && (Pri <= 10)) &&
                  std::move_constructible<T>
-    struct basic_worker
+    struct simple_worker
     {
-        basic_worker(basic_worker&) = delete;
-        auto operator=(basic_worker&) = delete;
+        simple_worker(simple_worker&) = delete;
+        auto operator=(simple_worker&) = delete;
 
-        ~basic_worker();
-        basic_worker(basic_worker&& src) noexcept;
-        basic_worker(std::function<void(T&)> c) noexcept;
+        ~simple_worker();
+        simple_worker(simple_worker&& src) noexcept;
+        simple_worker(std::function<void(T&)> c) noexcept;
 
         void queue(T&& item);
+
+        nlohmann::json toJson();
 
     private:
         std::deque<T>                items {};
@@ -56,22 +67,28 @@ Utility | Description
     };
 ```
 
-## `siddiqsoft::basic_pool`
+<hr/>
+
+## `siddiqsoft::simple_pool`
+
+Implements an array of threads backed with a *single* deque. Each thread waits for and processes the next available item from the single deque.
 
 ```cpp
     template <typename T, uint16_t N = 0>
         requires std::move_constructible<T>
-    struct basic_pool
+    struct simple_pool
     {
-        basic_pool(basic_pool&&)            = delete;
-        basic_pool& operator=(basic_pool&&) = delete;
-        basic_pool(basic_pool&)             = delete;
-        basic_pool& operator=(basic_pool&)  = delete;
+        simple_pool(simple_pool&&)            = delete;
+        simple_pool& operator=(simple_pool&&) = delete;
+        simple_pool(simple_pool&)             = delete;
+        simple_pool& operator=(simple_pool&)  = delete;
 
-        ~basic_pool();
-        basic_pool(std::function<void(T&)> c);
+        ~simple_pool();
+        simple_pool(std::function<void(T&)> c);
         
         void queue(T&& item);
+
+        nlohmann::json toJson();
 
     private:
         std::atomic_uint64_t         queueCounter {0};
@@ -84,7 +101,11 @@ Utility | Description
     };
 ```
 
+<hr/>
+
 ## `siddiqsoft::roundrobin_pool`
+
+Implements an vector of basic_workers (each worker has its independent queue therefore minimizing contention time).<br/>The queue method implements a running counter based round-robin feeder.
 
 ```cpp
     template <typename T, uint16_t N = 0>
@@ -100,10 +121,44 @@ Utility | Description
 
         void queue(T&& item);
 
+        nlohmann::json toJson();
+
     private:
-        std::atomic_uint64_t         queueCounter {0};
-        std::vector<basic_worker<T>> workers {};
-        uint64_t                     workersSize {};
-        constexpr size_t             nextWorkerIndex()
+        std::atomic_uint64_t          queueCounter {0};
+        std::vector<simple_worker<T>> workers {};
+        uint64_t                      workersSize {};
+        constexpr size_t              nextWorkerIndex()
+    };
+```
+
+<hr/>
+
+## `siddiqsoft::periodic_worker`
+
+Provides a facility where you can have your function/lambda invoked at a given periodic rate (in microseconds).
+
+You'd instantiate this class with your lambda and period in microseconds.
+
+```cpp
+    template <uint16_t Pri = 0>
+        requires ((Pri >= -10) && (Pri <= 10))
+    struct periodic_worker
+    {
+        periodic_worker(periodic_worker&)  = delete;
+        auto& operator=(periodic_worker&)  = delete;
+        periodic_worker(periodic_worker&&) = delete;
+        auto& operator=(periodic_worker&&) = delete;
+
+        ~periodic_worker();
+        periodic_worker(std::function<void()> c, std::chrono::microseconds) noexcept;
+
+        nlohmann::json toJson();
+
+    private:
+        uint64_t                    invokeCounter{0};
+        std::chrono::microseconds   invokePeriod {};
+        std::counting_semaphore<1>  signal {0};
+        std::function<void()>       callback;
+        std::jthread                processor;
     };
 ```

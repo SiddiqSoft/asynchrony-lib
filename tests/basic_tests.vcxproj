@@ -46,8 +46,9 @@
     <CodeAnalysisRuleSet>ca.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <ClCompile Include="basic_worker.cpp" />
-    <ClCompile Include="basic_pool.cpp" />
+    <ClCompile Include="periodic_worker.cpp" />
+    <ClCompile Include="simple_worker.cpp" />
+    <ClCompile Include="simple_pool.cpp" />
     <ClCompile Include="roundrobin_pool.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -36,12 +36,12 @@
 #ifndef ROUNDROBIN_POOL_HPP
 #define ROUNDROBIN_POOL_HPP
 
-#include "basic_worker.hpp"
+#include "simple_worker.hpp"
 
 
 namespace siddiqsoft
 {
-    /// @brief Implements a lock-free round robin work allocation into vector of basic_worker<T>
+    /// @brief Implements a lock-free round robin work allocation into vector of simple_worker<T>
     /// @tparam T Your datatype
     /// #tparam N Number of threads in the pool. Leave it to 0 to use the value returned by std::thread::hardware_concurrency()
     /// @remarks The number of threads in the pool is determined by the nature of your "work". If you're spending time against db
@@ -57,7 +57,7 @@ namespace siddiqsoft
         auto operator=(roundrobin_pool&) = delete;
 
 
-        /// @brief Consturcts a vector of basic_worker<T> with the given callback
+        /// @brief Consturcts a vector of simple_worker<T> with the given callback
         /// @param c Callback worker function
         roundrobin_pool(std::function<void(T&)> c)
         {
@@ -94,7 +94,7 @@ namespace siddiqsoft
         /// @param  this object
         nlohmann::json toJson() const
         {
-            return {{"_typver", "siddiqsoft.asynchrony-lib.roundrobin_pool/0.8"},
+            return {{"_typver", "siddiqsoft.asynchrony-lib.roundrobin_pool/0.9"},
                     {"workersSize", workersSize},
                     {"queueCounter", queueCounter.load()}};
         }
@@ -109,8 +109,8 @@ namespace siddiqsoft
 #endif
 
     private:
-        /// @brief Vector of the basic_worker elements of type T
-        std::vector<basic_worker<T>> workers {};
+        /// @brief Vector of the simple_worker elements of type T
+        std::vector<simple_worker<T>> workers {};
 
         /// @brief Tracks the size of the array workers
         uint64_t workersSize {};

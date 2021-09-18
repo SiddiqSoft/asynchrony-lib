@@ -39,76 +39,59 @@
 #include <format>
 #include <string>
 #include <thread>
+#include <barrier>
 
 #include "nlohmann/json.hpp"
-#include "../src/basic_worker.hpp"
+#include "../src/simple_pool.hpp"
 
-
-TEST(basic_worker, test1)
+TEST(simple_pool, test1)
 {
-    bool                                     passTest {false};
+    std::atomic_uint                       passTest {0};
 
-    siddiqsoft::basic_worker<nlohmann::json> worker {[&](auto& item) {
-        std::cerr << std::format("Got object: {}\n", item.dump());
-        passTest = true;
+    siddiqsoft::simple_pool<nlohmann::json> workers {[&passTest](auto& item) {
+        std::cerr << std::format("Item:{} .. Got object: {}\n", passTest.load(), item.dump());
+        passTest++;
     }};
 
-    worker.queue({{"hello", "world"}});
+    for (unsigned i = 0; i < std::thread::hardware_concurrency(); i++) {
+        workers.queue({{"test", "simple_pool"}, {"hello", "world"}, {"i", i}});
+    }
 
     // This is important otherwise the destructor will kill the thread before it has a chance to process anything!
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-    EXPECT_TRUE(passTest);
-
-    std::cerr << nlohmann::json(worker).dump() << std::endl;
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    EXPECT_EQ(passTest.load(), std::thread::hardware_concurrency());
+    std::cerr << nlohmann::json(workers).dump() << std::endl;
 }
 
 
-TEST(basic_worker, test2)
+TEST(simple_pool, test2)
 {
-    bool                                                      passTest {false};
+    const auto                FEEDER_COUNT = 8;
+    std::barrier              startFeeding {FEEDER_COUNT};
+    constexpr auto            WORKER_POOLSIZE = 8 * FEEDER_COUNT;
+    std::atomic_uint          passTest {0};
+    std::vector<std::jthread> feeders {};
 
-    siddiqsoft::basic_worker<std::shared_ptr<nlohmann::json>> worker {[&](auto& item) {
-        std::cerr << std::format("Got object: {}\n", item->dump());
-        passTest = true;
+    // The target is our workers
+    siddiqsoft::simple_pool<nlohmann::json, WORKER_POOLSIZE> workers {[&passTest](auto& item) {
+        std::cerr << std::this_thread::get_id() << std::format("..Item {:03} .. Got object: {}\n", passTest.load(), item.dump());
+        passTest++;
     }};
 
-    worker.queue(std::make_shared<nlohmann::json>(nlohmann::json {{"hello", "world"}}));
+    // This is our thread pool that will try to inject into the workers all at the same time
+    for (auto f = 0; f < FEEDER_COUNT; f++) {
+        feeders.emplace_back([&]() {
+            // Each thread waits
+            startFeeding.arrive_and_wait();
+            // ..until everyone's "arrived" and then they all simultaneously should feed into the workers
+            // with the objective that we excercise the correctness and shake out any potential race condition
+            for (auto j = 0; j < WORKER_POOLSIZE; j++) {
+                workers.queue({{"test", "simple_pool"}, {"hello", "world"}, {"j", j}});
+            }
+        });
+    }
 
     // This is important otherwise the destructor will kill the thread before it has a chance to process anything!
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-    EXPECT_TRUE(passTest);
-}
-
-
-TEST(basic_worker, test3)
-{
-    bool passTest {false};
-
-    struct nonCopyableObject
-    {
-        std::string Data {};
-
-        nonCopyableObject(const std::string& s)
-            : Data(s)
-        {
-        }
-
-        nonCopyableObject(nonCopyableObject&) = delete;
-        nonCopyableObject& operator=(nonCopyableObject&) = delete;
-
-        // Move constructors
-        nonCopyableObject(nonCopyableObject&&) = default;
-        nonCopyableObject& operator=(nonCopyableObject&&) = default;
-    };
-
-    siddiqsoft::basic_worker<nonCopyableObject> worker {[&](auto& item) {
-        std::cerr << std::format("Got object: {}\n", item.Data);
-        passTest = true;
-    }};
-
-    worker.queue(nonCopyableObject { "Hello world!"});
-
-    // This is important otherwise the destructor will kill the thread before it has a chance to process anything!
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-    EXPECT_TRUE(passTest);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    EXPECT_EQ(passTest.load(), FEEDER_COUNT * WORKER_POOLSIZE);
 }

@@ -40,11 +40,11 @@ struct MyWork
 void main()
 {
    // Declare worker with our data type and the driver function.
-   siddiqsoft::basic_worker<MyWork> worker{[](auto& item){
-                                      // call the item's operator()
-                                      // to invoke actual work.
-                                      item();
-                                    }};
+   siddiqsoft::simple_worker<MyWork> worker{[](auto& item){
+                                              // call the item's operator()
+                                              // to invoke actual work.
+                                              item();
+                                           }};
    // Fire 100 items
    for( int i=0; i < 100; i++ )
    {
@@ -64,12 +64,12 @@ void main()
 ## Multi-threaded worker pool
 
 ```cpp
-#include "siddiqsoft/basic_pool.hpp"
+#include "siddiqsoft/simple_pool.hpp"
 
 void main()
 {
    // Declare worker with our data type and the driver function.
-   siddiqsoft::basic_pool<MyWork> worker{[](auto& item){
+   siddiqsoft::simple_pool<MyWork> worker{[](auto& item){
                                            // call the item's operator()
                                            // to invoke actual work.
                                            item();

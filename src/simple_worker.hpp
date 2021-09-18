@@ -33,8 +33,8 @@
  */
 
 #pragma once
-#ifndef BASIC_WORKER_HPP
-#define BASIC_WORKER_HPP
+#ifndef SIMPLE_WORKER_HPP
+#define SIMPLE_WORKER_HPP
 
 
 #include <functional>
@@ -54,14 +54,14 @@ namespace siddiqsoft
     /// @tparam Pri Optional thread priority level. 0=Normal
     template <typename T, uint16_t Pri = 0>
         requires((Pri >= -10) && (Pri <= 10))
-    &&std::move_constructible<T> struct basic_worker
+    &&std::move_constructible<T> struct simple_worker
     {
     public:
-        basic_worker(basic_worker&) = delete;
-        auto operator=(basic_worker&) = delete;
+        simple_worker(simple_worker&) = delete;
+        auto operator=(simple_worker&) = delete;
 
 
-        ~basic_worker()
+        ~simple_worker()
         {
             // This is critical step since we wait on the semaphore for a long time (keeps threads suspended) and if we do not
             // decrease this interval then the shutdown will be quite delayed.
@@ -79,7 +79,7 @@ namespace siddiqsoft
 
         /// @brief Move constructor
         /// @param src Source to be moved into this object
-        basic_worker(basic_worker&& src) noexcept
+        simple_worker(simple_worker&& src) noexcept
             : callback(std::move(src.callback))
         {
             // NOTE
@@ -89,7 +89,7 @@ namespace siddiqsoft
 
         /// @brief Constructor requires the callback for the thread
         /// @param c The callback which accepts the type T as reference and performs action.
-        basic_worker(std::function<void(T&)> c)
+        simple_worker(std::function<void(T&)> c)
             : callback(c)
         {
         }
@@ -113,11 +113,13 @@ namespace siddiqsoft
         /// @brief Serializer for json
         /// @param  destination
         /// @param  this object
+        /// @note The use of signal.max() is causing an issue where winmindef.h is defining the `max` as a macro and thus we end up
+        /// with compiler error when the client application includes any of the windows headers! Disabled for now.
         nlohmann::json toJson() const
         {
-            return {{"_typver", "siddiqsoft.asynchrony-lib.basic_worker/0.8"},
+            return {{"_typver", "siddiqsoft.asynchrony-lib.simple_worker/0.9"},
                     {"dequeSize", items.size()},
-                    {"semaphoreMax", signal.max()},
+                    //{"semaphoreMax", signal.max()}, // conflicts with windows headers :-(
                     {"queueCounter", queueCounter},
                     {"threadPriority", Pri},
                     {"waitInterval", signalWaitInterval.count()}};
@@ -224,12 +226,12 @@ namespace siddiqsoft
     };
 
 #if defined(NLOHMANN_JSON_VERSION_MAJOR)
-    /// @brief Serializer for the basic_worker
+    /// @brief Serializer for the simple_worker
     /// @tparam T base typename
     /// @param dest destination json object
     /// @param src source object
     template <typename T, uint16_t Pri = 0>
-    static void to_json(nlohmann::json& dest, const siddiqsoft::basic_worker<T, Pri>& src)
+    static void to_json(nlohmann::json& dest, const siddiqsoft::simple_worker<T, Pri>& src)
     {
         dest = src.toJson();
     }
