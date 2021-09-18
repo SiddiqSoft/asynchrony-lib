@@ -58,6 +58,8 @@ TEST(basic_worker, test1)
     // This is important otherwise the destructor will kill the thread before it has a chance to process anything!
     std::this_thread::sleep_for(std::chrono::seconds(1));
     EXPECT_TRUE(passTest);
+
+    std::cerr << nlohmann::json(worker).dump() << std::endl;
 }
 
 

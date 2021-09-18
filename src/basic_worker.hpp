@@ -56,6 +56,7 @@ namespace siddiqsoft
         requires((Pri >= -10) && (Pri <= 10))
     &&std::move_constructible<T> struct basic_worker
     {
+    public:
         basic_worker(basic_worker&) = delete;
         auto operator=(basic_worker&) = delete;
 
@@ -88,7 +89,7 @@ namespace siddiqsoft
 
         /// @brief Constructor requires the callback for the thread
         /// @param c The callback which accepts the type T as reference and performs action.
-        basic_worker(std::function<void(T&)> c) 
+        basic_worker(std::function<void(T&)> c)
             : callback(c)
         {
         }
@@ -102,12 +103,30 @@ namespace siddiqsoft
                 std::unique_lock<std::shared_mutex> myWriterLock(items_mutex);
 
                 items.emplace_back(std::move(item));
+                queueCounter++;
             }
             // Signal outside the lock and after adding the item.
             signal.release();
         }
 
+#if defined(NLOHMANN_JSON_VERSION_MAJOR)
+        /// @brief Serializer for json
+        /// @param  destination
+        /// @param  this object
+        nlohmann::json toJson() const
+        {
+            return {{"_typver", "siddiqsoft.asynchrony-lib.basic_worker/0.8"},
+                    {"dequeSize", items.size()},
+                    {"semaphoreMax", signal.max()},
+                    {"queueCounter", queueCounter},
+                    {"threadPriority", Pri},
+                    {"waitInterval", signalWaitInterval.count()}};
+        }
+#endif
+
     private:
+        /// @brief Track number of times we've got items added into our queue
+        uint64_t queueCounter {0};
         /// @brief The internal queue for this worker.
         std::deque<T> items {};
         /// @brief Mutex to protect the items
@@ -203,6 +222,18 @@ namespace siddiqsoft
             return {};
         }
     };
-} // namespace siddiqsoft
 
+#if defined(NLOHMANN_JSON_VERSION_MAJOR)
+    /// @brief Serializer for the basic_worker
+    /// @tparam T base typename
+    /// @param dest destination json object
+    /// @param src source object
+    template <typename T, uint16_t Pri = 0>
+    static void to_json(nlohmann::json& dest, const siddiqsoft::basic_worker<T, Pri>& src)
+    {
+        dest = src.toJson();
+    }
+#endif
+
+} // namespace siddiqsoft
 #endif // !BASIC_WORKER_HPP

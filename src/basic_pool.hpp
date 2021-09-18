@@ -52,7 +52,13 @@ namespace siddiqsoft
         requires std::move_constructible<T>
     struct basic_pool
     {
-         /// @brief Destructor.
+        basic_pool(basic_pool&&) = delete;
+        basic_pool& operator=(basic_pool&&) = delete;
+        basic_pool(basic_pool&)             = delete;
+        basic_pool& operator=(basic_pool&) = delete;
+
+
+        /// @brief Destructor.
         /// @remarks We need to make sure that the signal wait interval is reduced to 1ms to allow our thread (which are waiting on
         /// the signal) can be stopped.
         ~basic_pool()
@@ -123,6 +129,21 @@ namespace siddiqsoft
             ++queueCounter;
         }
 
+#if defined(NLOHMANN_JSON_VERSION_MAJOR)
+        /// @brief Serializer for json
+        /// @param  destination
+        /// @param  this object
+        nlohmann::json toJson() const
+        {
+            return {{"_typver", "siddiqsoft.asynchrony-lib.basic_pool/0.8"},
+                    {"workersSize", workers.size()},
+                    {"dequeSize", items.size()},
+                    {"semaphoreMax", signal.max()},
+                    {"queueCounter", queueCounter.load()},
+                    {"waitInterval", signalWaitInterval.count()}};
+        }
+#endif
+
 #ifdef _DEBUG
     public:
         std::atomic_uint64_t queueCounter {0};
@@ -141,6 +162,18 @@ namespace siddiqsoft
         /// set to 1ms.
         std::chrono::milliseconds signalWaitInterval {1500};
     };
-} // namespace siddiqsoft
 
+#if defined(NLOHMANN_JSON_VERSION_MAJOR)
+    /// @brief Serializer for the basic_worker
+    /// @tparam T base typename
+    /// @param dest destination json object
+    /// @param src source object
+    template <typename T, uint16_t N = 0>
+    static void to_json(nlohmann::json& dest, const siddiqsoft::basic_pool<T, N>& src)
+    {
+        dest = src.toJson();
+    }
+#endif
+
+} // namespace siddiqsoft
 #endif // !BASIC_WORKER_HPP

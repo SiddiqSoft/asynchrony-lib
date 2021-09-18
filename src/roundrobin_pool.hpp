@@ -50,8 +50,11 @@ namespace siddiqsoft
         requires std::move_constructible<T>
     struct roundrobin_pool
     {
+    public:
         roundrobin_pool(roundrobin_pool&&) = delete;
         auto operator=(roundrobin_pool&&) = delete;
+        roundrobin_pool(roundrobin_pool&) = delete;
+        auto operator=(roundrobin_pool&) = delete;
 
 
         /// @brief Consturcts a vector of basic_worker<T> with the given callback
@@ -85,6 +88,18 @@ namespace siddiqsoft
             workers.at(nextWorkerIndex()).queue(std::move(item));
         }
 
+#if defined(NLOHMANN_JSON_VERSION_MAJOR)
+        /// @brief Serializer for json
+        /// @param  destination
+        /// @param  this object
+        nlohmann::json toJson() const
+        {
+            return {{"_typver", "siddiqsoft.asynchrony-lib.roundrobin_pool/0.8"},
+                    {"workersSize", workersSize},
+                    {"queueCounter", queueCounter.load()}};
+        }
+#endif
+
 #ifdef _DEBUG
     public:
         std::atomic_uint64_t queueCounter {0};
@@ -108,6 +123,18 @@ namespace siddiqsoft
             return workersSize == 0 ? 0 : queueCounter.load() % workersSize;
         }
     };
-} // namespace siddiqsoft
 
+#if defined(NLOHMANN_JSON_VERSION_MAJOR)
+    /// @brief Serializer for the roundrobin_pool
+    /// @tparam T base typename
+    /// @param dest destination json object
+    /// @param src source object
+    template <typename T, uint16_t N = 0>
+    static void to_json(nlohmann::json& dest, const siddiqsoft::roundrobin_pool<T, N>& src)
+    {
+        dest = src.toJson();
+    }
+#endif
+
+} // namespace siddiqsoft
 #endif // !BASIC_WORKER_HPP

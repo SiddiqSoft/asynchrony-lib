@@ -63,6 +63,11 @@ Utility | Description
         requires std::move_constructible<T>
     struct basic_pool
     {
+        basic_pool(basic_pool&&)            = delete;
+        basic_pool& operator=(basic_pool&&) = delete;
+        basic_pool(basic_pool&)             = delete;
+        basic_pool& operator=(basic_pool&)  = delete;
+
         ~basic_pool();
         basic_pool(std::function<void(T&)> c);
         
@@ -87,7 +92,9 @@ Utility | Description
     struct roundrobin_pool
     {
         roundrobin_pool(roundrobin_pool&&) = delete;
-        auto operator=(roundrobin_pool&&) = delete;
+        auto operator=(roundrobin_pool&&)  = delete;
+        roundrobin_pool(roundrobin_pool&)  = delete;
+        auto operator=(roundrobin_pool&)   = delete;
 
         roundrobin_pool(std::function<void(T&)> c);
 
