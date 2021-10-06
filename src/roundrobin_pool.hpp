@@ -94,7 +94,7 @@ namespace siddiqsoft
         /// @param  this object
         nlohmann::json toJson() const
         {
-            return {{"_typver", "siddiqsoft.asynchrony-lib.roundrobin_pool/0.9"},
+            return {{"_typver", "siddiqsoft.asynchrony-lib.roundrobin_pool/0.10"},
                     {"workersSize", workersSize},
                     {"queueCounter", queueCounter.load()}};
         }

@@ -49,6 +49,45 @@
 
 namespace siddiqsoft
 {
+    /// @brief This helper exists ONLY to ensure that we avoid making a copy and pop item from the deque.
+    /// @notes CAUTION. If you do not call pop() then the destructor will
+    /// throw away the item when it is invoked.
+    /// This structure is private and it is intended to be used as a helper
+    /// to ensure we pop the queue item to avoid making copies and invoking
+    /// callback inside the lock.
+    template <typename T>
+        requires std::move_constructible<T>
+    struct popOnDestruct
+    {
+        /// @brief Constructor holds references to the underlying deque and the mutex. When the
+        /// @param items The reference to the deque
+        /// @param items_mutex The reference to the mutex
+        explicit popOnDestruct(std::deque<T>& items, std::shared_mutex& items_mutex) noexcept
+            : parentDeque(items)
+            , parentMutex(items_mutex)
+        {
+        }
+
+        /// @brief Returns the item at the front of the deque inside lock
+        /// @return Item
+        T pop()
+        {
+            std::unique_lock<std::shared_mutex> myWriterLock(parentMutex);
+            return std::move(parentDeque.front());
+        }
+
+        /// @brief Pop the front of the queue upon destructor invocation
+        ~popOnDestruct() noexcept
+        {
+            if (!parentDeque.empty()) parentDeque.pop_front();
+        }
+
+    private:
+        std::deque<T>&     parentDeque; // reference to the parent deque
+        std::shared_mutex& parentMutex; // reference to the parent mutex
+    };
+
+
     /// @brief Implements a simple queue + semaphore driven asynchronous processor
     /// @tparam T The data type for this processor
     /// @tparam Pri Optional thread priority level. 0=Normal
@@ -117,7 +156,7 @@ namespace siddiqsoft
         /// with compiler error when the client application includes any of the windows headers! Disabled for now.
         nlohmann::json toJson() const
         {
-            return {{"_typver", "siddiqsoft.asynchrony-lib.simple_worker/0.9"},
+            return {{"_typver", "siddiqsoft.asynchrony-lib.simple_worker/0.10"},
                     {"dequeSize", items.size()},
                     //{"semaphoreMax", signal.max()}, // conflicts with windows headers :-(
                     {"queueCounter", queueCounter},
@@ -166,42 +205,6 @@ namespace siddiqsoft
                 }
             } // while ..continue until we're asked to stop
         }};
-
-        /// @brief This helper exists ONLY to ensure that we avoid making a copy and pop item from the deque.
-        /// @notes CAUTION. If you do not call pop() then the destructor will
-        /// throw away the item when it is invoked.
-        /// This structure is private and it is intended to be used as a helper
-        /// to ensure we pop the queue item to avoid making copies and invoking
-        /// callback inside the lock.
-        struct popOnDestruct
-        {
-            /// @brief Constructor holds references to the underlying deque and the mutex. When the
-            /// @param items The reference to the deque
-            /// @param items_mutex The reference to the mutex
-            explicit popOnDestruct(std::deque<T>& items, std::shared_mutex& items_mutex) noexcept
-                : parentDeque(items)
-                , parentMutex(items_mutex)
-            {
-            }
-
-            /// @brief Returns the item at the front of the deque inside lock
-            /// @return Item
-            T pop()
-            {
-                std::unique_lock<std::shared_mutex> myWriterLock(parentMutex);
-                return std::move(parentDeque.front());
-            }
-
-            /// @brief Pop the front of the queue upon destructor invocation
-            ~popOnDestruct() noexcept
-            {
-                if (!parentDeque.empty()) parentDeque.pop_front();
-            }
-
-        private:
-            std::deque<T>&     parentDeque; // reference to the parent deque
-            std::shared_mutex& parentMutex; // reference to the parent mutex
-        };
 
         /// @brief Performs an acquire on the semaphore and if successful,
         /// attempts to lock to pull the item from the top of the deque.
