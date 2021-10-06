@@ -66,9 +66,9 @@ TEST(simple_pool, test1)
 
 TEST(simple_pool, test2)
 {
-    const auto                FEEDER_COUNT = 8;
+    const auto                FEEDER_COUNT = 2;
     std::barrier              startFeeding {FEEDER_COUNT};
-    constexpr auto            WORKER_POOLSIZE = 8 * FEEDER_COUNT;
+    constexpr auto            WORKER_POOLSIZE = 2 * FEEDER_COUNT;
     std::atomic_uint          passTest {0};
     std::vector<std::jthread> feeders {};
 
@@ -86,7 +86,7 @@ TEST(simple_pool, test2)
             // ..until everyone's "arrived" and then they all simultaneously should feed into the workers
             // with the objective that we excercise the correctness and shake out any potential race condition
             for (auto j = 0; j < WORKER_POOLSIZE; j++) {
-                workers.queue({{"test", "simple_pool"}, {"hello", "world"}, {"j", j}});
+                workers.queue({{"test", "simple_pool"}, {"hello", "world"}, {"p2j", std::to_string(j)}});
             }
         });
     }
@@ -116,7 +116,7 @@ public:
     meow_type(nlohmann::json&& src)
     {
         this->swap(src);
-       //static_cast<nlohmann::json>(*this).operator=(std::move(src));
+        // static_cast<nlohmann::json>(*this).operator=(std::move(src));
     }
 
     meow_type(meow_type&&) = default;
@@ -162,8 +162,8 @@ TEST(simple_pool, test3)
 
     for (unsigned i = 0; i < std::thread::hardware_concurrency(); i++) {
         try {
-            std::string n {std::format("test3..{}", i)};
-            workers.queue(cat_type(nlohmann::json {{"test", "simple_pool"}, {"hello", "world"}, {"i", i}}, std::move(n)));
+            workers.queue(
+                    cat_type(nlohmann::json {{"test", "simple_pool"}, {"hello", "world"}, {"i", i}}, std::format("test3..{}", i)));
         }
         catch (const std::exception& e) {
             std::cerr << e.what() << std::endl;
