@@ -94,19 +94,12 @@ namespace siddiqsoft
                     // If we have an item, invoke the callback with the item
                     while (!st.stop_requested()) {
                         try {
-                            if (signal.try_acquire_for(signalWaitInterval)) {
-                                // Guard against empty signals which are terminating indicator
-                                if (!items.empty() && !st.stop_requested()) {
-                                    T item;
-
-                                    { // scope lock to pull item from the deque
-                                        std::unique_lock<std::shared_mutex> myWriterLock(items_mutex);
-                                        item = items.front();
-                                        items.pop_front();
-                                    } // end of lock
-                                    // Delegate to the callback outside the lock
-                                    callback(item);
-                                }
+                            // The getNextItem performs the wait on the signal and if it expires, returns empty.
+                            // If there is an item, it will get that item (minimizing move) and performs the pop
+                            // and returns the item so we can invoke the callback outside the lock.
+                            if (auto item = getNextItem(signalWaitInterval); item && !st.stop_requested()) {
+                                // Delegate to the callback outside the lock
+                                callback(*item);
                             }
                         }
                         catch (...) {
@@ -116,7 +109,7 @@ namespace siddiqsoft
             }
         }
 
-        /// @brief Queue item into the deque
+        /// @brief Queue item into the deque (takes "ownership" of the item)
         /// @param item Item to queue must be move'd
         void queue(T&& item)
         {
@@ -137,12 +130,12 @@ namespace siddiqsoft
         /// with compiler error when the client application includes any of the windows headers! Disabled for now.
         nlohmann::json toJson() const
         {
-            return nlohmann::json{{"_typver", "siddiqsoft.asynchrony-lib.simple_pool/0.9"},
-                    {"workersSize", workers.size()},
-                    {"dequeSize", items.size()},
-                    //{"semaphoreMax", signal.max()}, // conflicts with windows headers :-(
-                    {"queueCounter", queueCounter.load()},
-                    {"waitInterval", signalWaitInterval.count()}};
+            return nlohmann::json {{"_typver", "siddiqsoft.asynchrony-lib.simple_pool/0.10"},
+                                   {"workersSize", workers.size()},
+                                   {"dequeSize", items.size()},
+                                   //{"semaphoreMax", signal.max()}, // conflicts with windows headers :-(
+                                   {"queueCounter", queueCounter.load()},
+                                   {"waitInterval", signalWaitInterval.count()}};
         }
 #endif
 
@@ -163,6 +156,28 @@ namespace siddiqsoft
         /// @brief This is the interval we wait on the signal. It starts off with 500ms and when the thread is to shutdown, it is
         /// set to 1ms.
         std::chrono::milliseconds signalWaitInterval {1500};
+
+
+        /// @brief Performs an acquire on the semaphore and if successful,
+        /// attempts to lock to pull the item from the top of the deque.
+        /// @param delta Amount of milliseconds to wait on the semaphore
+        /// @return An optional which may contain the item or empty (most of the time it'll be empty)
+        std::optional<T> getNextItem(std::chrono::milliseconds& delta)
+        {
+            if (signal.try_acquire_for(signalWaitInterval)) {
+                // Guard against empty signals which are terminating indicator
+                if (!items.empty()) {
+                    // Ensures that we pop_front upon exit of this scope
+                    popOnDestruct pod {items, items_mutex};
+                    // The pop() method gets the front item within lock and gets back the item
+                    return pod.pop();
+                    // The item is now pop'd due to the destructor invoked by popOnDestruct
+                }
+            }
+
+            // Fall-through empty
+            return {};
+        }
     };
 
 #if defined(NLOHMANN_JSON_VERSION_MAJOR)

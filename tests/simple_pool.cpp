@@ -46,7 +46,7 @@
 
 TEST(simple_pool, test1)
 {
-    std::atomic_uint                       passTest {0};
+    std::atomic_uint                        passTest {0};
 
     siddiqsoft::simple_pool<nlohmann::json> workers {[&passTest](auto& item) {
         std::cerr << std::format("Item:{} .. Got object: {}\n", passTest.load(), item.dump());
@@ -94,4 +94,84 @@ TEST(simple_pool, test2)
     // This is important otherwise the destructor will kill the thread before it has a chance to process anything!
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     EXPECT_EQ(passTest.load(), FEEDER_COUNT * WORKER_POOLSIZE);
+}
+
+
+/*
+ * The test is to check if we have the proper capability to handle default copy/move constructors/operators
+ * for the simple_pool object. See the issue: https://github.com/SiddiqSoft/asynchrony-lib/issues/3
+ */
+
+
+class meow_type : public nlohmann::json
+{
+public:
+    static const inline std::string L1 = "meow_type";
+
+    meow_type(const nlohmann::json& src)
+    {
+        this->update(src);
+    }
+
+    meow_type(nlohmann::json&& src)
+    {
+        this->swap(src);
+       //static_cast<nlohmann::json>(*this).operator=(std::move(src));
+    }
+
+    meow_type(meow_type&&) = default;
+
+
+    meow_type(const meow_type& src)
+    {
+        this->update(nlohmann::json(src));
+    }
+
+    meow_type& operator=(meow_type&& src) = default;
+
+
+    meow_type& operator                   =(nlohmann::json&& src)
+    {
+        this->swap(src);
+        return *this;
+    }
+};
+
+
+struct cat_type
+{
+    cat_type(nlohmann::json&& src, std::string&& n)
+        : meow(std::move(src))
+        , name(std::move(n))
+    {
+    }
+    meow_type   meow;
+    std::string name {};
+};
+
+
+TEST(simple_pool, test3)
+{
+    std::atomic_uint                  passTest {0};
+
+
+    siddiqsoft::simple_pool<cat_type> workers {[&passTest](auto& item) {
+        std::cerr << std::format("Item:{} .. Got object: >{} -- {}<\n", passTest.load(), item.meow.dump(), item.name);
+        passTest++;
+    }};
+
+    for (unsigned i = 0; i < std::thread::hardware_concurrency(); i++) {
+        try {
+            std::string n {std::format("test3..{}", i)};
+            workers.queue(cat_type(nlohmann::json {{"test", "simple_pool"}, {"hello", "world"}, {"i", i}}, std::move(n)));
+        }
+        catch (const std::exception& e) {
+            std::cerr << e.what() << std::endl;
+        }
+    }
+
+    // This is important otherwise the destructor will kill the thread before it has a chance to process anything!
+    std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+    EXPECT_EQ(passTest.load(), std::thread::hardware_concurrency());
+    std::cerr << nlohmann::json(workers).dump() << std::endl;
 }
