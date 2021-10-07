@@ -79,6 +79,7 @@ namespace siddiqsoft
         /// @brief Pop the front of the queue upon destructor invocation
         ~popOnDestruct() noexcept
         {
+            std::unique_lock<std::shared_mutex> myWriterLock(parentMutex);
             if (!parentDeque.empty()) parentDeque.pop_front();
         }
 
@@ -172,8 +173,8 @@ namespace siddiqsoft
         std::deque<T> items {};
         /// @brief Mutex to protect the items
         std::shared_mutex items_mutex {};
-        /// @brief Semaphore with initial max of 128 items (backlog)
-        std::counting_semaphore<512> signal {0};
+        /// @brief Semaphore with default max signals.
+        std::counting_semaphore<> signal {0};
         /// @brief This is the interval we wait on the signal. It starts off with 500ms and when the thread is to shutdown, it is
         /// set to 1ms.
         std::chrono::milliseconds signalWaitInterval {1500};

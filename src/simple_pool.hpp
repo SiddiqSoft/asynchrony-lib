@@ -148,11 +148,11 @@ namespace siddiqsoft
 #endif
 
     private:
-        std::vector<std::jthread>    workers {};
-        std::function<void(T&)>      callback;
-        std::counting_semaphore<512> signal {0};
-        std::deque<T>                items {};
-        std::shared_mutex            items_mutex;
+        std::vector<std::jthread> workers {};
+        std::function<void(T&)>   callback;
+        std::counting_semaphore<> signal {0};
+        std::deque<T>             items {};
+        std::shared_mutex         items_mutex;
         /// @brief This is the interval we wait on the signal. It starts off with 500ms and when the thread is to shutdown, it is
         /// set to 1ms.
         std::chrono::milliseconds signalWaitInterval {1500};
