@@ -166,12 +166,13 @@ namespace siddiqsoft
         {
             if (signal.try_acquire_for(signalWaitInterval)) {
                 // Guard against empty signals which are terminating indicator
+                std::unique_lock<std::shared_mutex> myWriterLock(items_mutex);
+                // Guard against empty signals which are terminating indicator
                 if (!items.empty()) {
-                    // Ensures that we pop_front upon exit of this scope
-                    popOnDestruct pod {items, items_mutex};
-                    // The pop() method gets the front item within lock and gets back the item
-                    return pod.pop();
-                    // The item is now pop'd due to the destructor invoked by popOnDestruct
+                    // WE require that the stored type by move-constructible!
+                    T item {std::move(items.front())};
+                    items.pop_front();
+                    return std::move(item);
                 }
             }
 
