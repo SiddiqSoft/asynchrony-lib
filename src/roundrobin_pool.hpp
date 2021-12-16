@@ -59,7 +59,7 @@ namespace siddiqsoft
 
         /// @brief Consturcts a vector of simple_worker<T> with the given callback
         /// @param c Callback worker function
-        roundrobin_pool(std::function<void(T&)> c)
+        roundrobin_pool(std::function<void(T&&)> c)
         {
             // *CRITICAL*
             // This is step is *critical* otherwise we will end up moving threads as we add elements to the vector.

@@ -48,7 +48,7 @@ TEST(simple_worker, test1)
 {
     bool                                      passTest {false};
 
-    siddiqsoft::simple_worker<nlohmann::json> worker {[&](auto& item) {
+    siddiqsoft::simple_worker<nlohmann::json> worker {[&](auto&& item) {
         std::cerr << std::format("Got object: {}\n", item.dump());
         passTest = true;
     }};
@@ -67,7 +67,7 @@ TEST(simple_worker, test2)
 {
     bool                                                       passTest {false};
 
-    siddiqsoft::simple_worker<std::shared_ptr<nlohmann::json>> worker {[&](auto& item) {
+    siddiqsoft::simple_worker<std::shared_ptr<nlohmann::json>> worker {[&](auto&& item) {
         std::cerr << std::format("Got object: {}\n", item->dump());
         passTest = true;
     }};
@@ -101,7 +101,7 @@ TEST(simple_worker, test3)
         nonCopyableObject& operator=(nonCopyableObject&&) = default;
     };
 
-    siddiqsoft::simple_worker<nonCopyableObject> worker {[&](auto& item) {
+    siddiqsoft::simple_worker<nonCopyableObject> worker {[&](auto&& item) {
         std::cerr << std::format("Got object: {}\n", item.Data);
         passTest = true;
     }};

@@ -49,7 +49,7 @@ TEST(roundrobin_pool, test1)
 {
     std::atomic_uint                            passTest {0};
 
-    siddiqsoft::roundrobin_pool<nlohmann::json> workers {[&passTest](auto& item) {
+    siddiqsoft::roundrobin_pool<nlohmann::json> workers {[&passTest](auto&& item) {
         std::cerr << std::format("Item:{} .. Got object: {}\n", passTest.load(), item.dump());
         passTest++;
     }};
@@ -74,7 +74,7 @@ TEST(roundrobin_pool, test2)
     std::vector<std::jthread> feeders {};
 
     // The target is our workers
-    siddiqsoft::roundrobin_pool<nlohmann::json, WORKER_POOLSIZE> workers {[&passTest](auto& item) {
+    siddiqsoft::roundrobin_pool<nlohmann::json, WORKER_POOLSIZE> workers {[&passTest](auto&& item) {
         std::cerr << std::this_thread::get_id() << std::format("..Item {:03} .. Got object: {}\n", passTest.load(), item.dump());
         passTest++;
     }};

@@ -84,7 +84,7 @@ Implements an array of threads backed with a *single* deque. Each thread waits f
         simple_pool& operator=(simple_pool&)  = delete;
 
         ~simple_pool();
-        simple_pool(std::function<void(T&)> c);
+        simple_pool(std::function<void(T&&)> c);
         
         void queue(T&& item);
 
@@ -93,7 +93,7 @@ Implements an array of threads backed with a *single* deque. Each thread waits f
     private:
         std::atomic_uint64_t         queueCounter {0};
         std::vector<std::jthread>    workers {};
-        std::function<void(T&)>      callback;
+        std::function<void(T&&)>     callback;
         std::counting_semaphore<512> signal {0};
         std::deque<T>                items {};
         std::shared_mutex            items_mutex;
@@ -117,7 +117,7 @@ Implements an vector of basic_workers (each worker has its independent queue the
         roundrobin_pool(roundrobin_pool&)  = delete;
         auto operator=(roundrobin_pool&)   = delete;
 
-        roundrobin_pool(std::function<void(T&)> c);
+        roundrobin_pool(std::function<void(T&&)> c);
 
         void queue(T&& item);
 

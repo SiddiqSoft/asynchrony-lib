@@ -89,7 +89,7 @@ namespace siddiqsoft
 
         /// @brief Constructor requires the callback for the thread
         /// @param c The callback which accepts the type T as reference and performs action.
-        simple_worker(std::function<void(T&)> c)
+        simple_worker(std::function<void(T&&)> c)
             : callback(c)
         {
         }
@@ -139,7 +139,7 @@ namespace siddiqsoft
         /// set to 1ms.
         std::chrono::milliseconds signalWaitInterval {1500};
         /// @brief The callback is invoked whenever there is an item in the queue
-        std::function<void(T&)> callback;
+        std::function<void(T&&)> callback;
         /// @brief Processor thread
         /// The driver runs forever until signalled to stop
         /// Tries to get next item ready in the queue (for max 500ms cycle)
@@ -159,7 +159,7 @@ namespace siddiqsoft
                     // and returns the item so we can invoke the callback outside the lock.
                     if (auto item = getNextItem(signalWaitInterval); item && !st.stop_requested()) {
                         // Delegate to the callback outside the lock
-                        callback(*item);
+                        callback(std::move(*item));
                     }
                 }
                 catch (...) {

@@ -78,7 +78,7 @@ namespace siddiqsoft
 
         /// @brief Contructs a threadpool with N threads with the given callback/worker function
         /// @param c The worker function.
-        simple_pool(std::function<void(T&)> c)
+        simple_pool(std::function<void(T&&)> c)
             : callback(c)
         {
             // *CRITICAL*
@@ -99,7 +99,7 @@ namespace siddiqsoft
                             // and returns the item so we can invoke the callback outside the lock.
                             if (auto item = getNextItem(signalWaitInterval); item && !st.stop_requested()) {
                                 // Delegate to the callback outside the lock
-                                callback(*item);
+                                callback(std::move(*item));
                             }
                         }
                         catch (...) {
@@ -133,7 +133,6 @@ namespace siddiqsoft
             return nlohmann::json {{"_typver", "siddiqsoft.asynchrony-lib.simple_pool/0.10"},
                                    {"workersSize", workers.size()},
                                    {"dequeSize", items.size()},
-                                   //{"semaphoreMax", signal.max()}, // conflicts with windows headers :-(
                                    {"queueCounter", queueCounter.load()},
                                    {"waitInterval", signalWaitInterval.count()}};
         }
@@ -149,7 +148,7 @@ namespace siddiqsoft
 
     private:
         std::vector<std::jthread> workers {};
-        std::function<void(T&)>   callback;
+        std::function<void(T&&)>   callback;
         std::counting_semaphore<> signal {0};
         std::deque<T>             items {};
         std::shared_mutex         items_mutex;

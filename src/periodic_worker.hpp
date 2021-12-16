@@ -102,10 +102,12 @@ namespace siddiqsoft
         /// with compiler error when the client application includes any of the windows headers! Disabled for now.
         nlohmann::json toJson() const
         {
-            return {{"_typver", "siddiqsoft.asynchrony-lib.periodic_worker/0.10"},
-                    {"invokeCounter", invokeCounter},
-                    {"threadPriority", Pri},
-                    {"waitInterval", invokePeriod.count()}};
+            using namespace std;
+
+            return {{"_typver"s, "siddiqsoft.asynchrony-lib.periodic_worker/0.10"s},
+                    {"invokeCounter"s, invokeCounter},
+                    {"threadPriority"s, Pri},
+                    {"waitInterval"s, invokePeriod.count()}};
         }
 #endif
 
@@ -163,4 +165,4 @@ namespace siddiqsoft
 #endif
 
 } // namespace siddiqsoft
-#endif // !BASIC_WORKER_HPP
+#endif
