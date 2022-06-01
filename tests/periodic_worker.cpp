@@ -50,7 +50,7 @@ TEST(periodic_worker, test1)
 
     siddiqsoft::periodic_worker worker {[&]() { passTest++; }, std::chrono::milliseconds(100)};
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(5100));
+    std::this_thread::sleep_for(std::chrono::milliseconds(5500));
 
     // We expect at least 50 iterations at a rate of one per 100ms with a test time of 5s.
     // This test is going to be tough since each VM configuration varies and the CPU frequency has a bearing on how "fast" or "lazy"
