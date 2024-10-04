@@ -19,7 +19,7 @@
 		<icon>docs\Siddiq-Software-Avatar.png</icon>
 		<readme>docs\README.md</readme>
 		<releaseNotes></releaseNotes>
-		<copyright>Copyright (c) 2021 Siddiq Software LLC</copyright>
+		<copyright>Copyright (c) 2021-2024 Siddiq Software LLC</copyright>
 		<!-- Dependencies -->
 		<dependencies>
 		</dependencies>

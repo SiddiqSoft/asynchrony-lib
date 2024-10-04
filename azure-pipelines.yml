@@ -22,9 +22,9 @@ variables:
   
 steps:
 - task: NuGetToolInstaller@1
-  displayName: 'Use NuGet 5.10.0'
+  displayName: 'Use NuGet 6.10'
   inputs:
-    versionSpec: '5.10.0'
+    versionSpec: '6.10'
     checkLatest: true
 
 - task: GitVersion@5
@@ -36,7 +36,7 @@ steps:
   displayName: 'Set build version'
   env:
     Action: '##vso[build.updatebuildnumber]'
-    BuildVersion: $(GitVersion.NugetVersionV2)
+    BuildVersion: $(GitVersion.MajorMinorPatch)
 
 - task: NuGetCommand@2
   displayName: 'NuGet restore'
