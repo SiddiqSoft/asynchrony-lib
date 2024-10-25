@@ -52,7 +52,7 @@ namespace siddiqsoft
     /// @brief Implements a simple queue + semaphore driven asynchronous processor
     /// @tparam T The data type for this processor
     /// @tparam Pri Optional thread priority level. 0=Normal
-    template <uint16_t Pri = 0>
+    template <int Pri = 0>
         requires((Pri >= -10) && (Pri <= 10))
     struct periodic_worker
     {
@@ -87,9 +87,10 @@ namespace siddiqsoft
         /// @brief Constructor requires the callback for the thread
         /// @param c The callback which accepts the type T as reference and performs action.
         /// @param interval The interval between each invocation
-        periodic_worker(std::function<void()> c, std::chrono::microseconds interval)
+        periodic_worker(std::function<void()> c, std::chrono::microseconds interval, const std::string& name={"anonymous-periodic-worker"})
             : callback(c)
             , invokePeriod(interval)
+            , threadName(name)
         {
         }
 
@@ -105,6 +106,7 @@ namespace siddiqsoft
             using namespace std;
 
             return {{"_typver"s, "siddiqsoft.asynchrony-lib.periodic_worker/0.10"s},
+                    {"threadName", threadName},
                     {"invokeCounter"s, invokeCounter},
                     {"threadPriority"s, Pri},
                     {"waitInterval"s, invokePeriod.count()}};
@@ -112,6 +114,8 @@ namespace siddiqsoft
 #endif
 
     private:
+        /// @brief Internal name of the worker thread (when supported the thread name displays in the debugger)
+        std::string threadName {"anonymous-periodic-worker"};
         /// @brief Track number of times we've invoked the callback
         uint64_t invokeCounter {0};
         /// @brief Semaphore with initial max of 128 items (backlog)
