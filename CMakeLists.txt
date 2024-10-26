@@ -34,7 +34,15 @@ FetchContent_Declare(
     GIT_SHALLOW TRUE
     GIT_NO_TAGS TRUE
 )
-FetchContent_MakeAvailable(nlohmann_json)
+# Get the googletest
+FetchContent_Declare(googletest
+					GIT_REPOSITORY https://github.com/google/googletest.git
+					GIT_TAG	v1.15.2
+				    GIT_SHALLOW TRUE
+					GIT_NO_TAGS TRUE
+)
+
+FetchContent_MakeAvailable(googletest nlohmann_json)
 
 
 # Get the branch name and the version tag (requires that we have a semver tag at some point!)

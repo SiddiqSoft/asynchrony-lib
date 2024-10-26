@@ -8,27 +8,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 find_package(Git REQUIRED)
 include(FetchContent)
 
-# Get the googletest
-FetchContent_Declare(googletest
-					GIT_REPOSITORY https://github.com/google/googletest.git
-					GIT_TAG	v1.15.2
-				    GIT_SHALLOW TRUE
-					GIT_NO_TAGS TRUE
-)
-FetchContent_MakeAvailable(googletest)
-
 file(GLOB testSRC "./*.cpp")
 
 add_executable(asynchronylib_test ${testSRC})
-
-if(WIN32)
-	message(STATUS "  Windows not adding coverage options..")
-elseif(UNIX)
-	message(STATUS "  UNIX adding coverage options..")
-	target_compile_options(asynchronylib_test PUBLIC "-O0" "-fprofile-arcs" "-ftest-coverage")
-	target_link_libraries(asynchronylib_test PRIVATE gcov)
-	target_link_libraries(asynchronylib_test PRIVATE -coverage)
-endif()
 
 # Common stuff..
 target_link_libraries(asynchronylib_test PRIVATE GTest::gtest_main)
