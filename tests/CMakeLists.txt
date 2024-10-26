@@ -21,5 +21,5 @@ include(GoogleTest)
 # In order to properly locate the tests folder, we must provide the environment variable
 # SAMPLES_DIR. This should
 gtest_discover_tests(${CMAKE_PROJECT_NAME}_test
-                     XML_OUTPUT_DIR "${PROJECT_SOURCE_DIR}/tests"
+                     XML_OUTPUT_DIR "${PROJECT_SOURCE_DIR}/tests/results"
 )
