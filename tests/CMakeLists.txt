@@ -10,17 +10,16 @@ include(FetchContent)
 
 file(GLOB testSRC "./*.cpp")
 
-add_executable(asynchronylib_test ${testSRC})
+add_executable(${CMAKE_PROJECT_NAME}_test ${testSRC})
 
 # Common stuff..
-target_link_libraries(asynchronylib_test PRIVATE GTest::gtest_main)
-target_link_libraries(asynchronylib_test PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(${CMAKE_PROJECT_NAME}_test PRIVATE GTest::gtest_main)
+target_link_libraries(${CMAKE_PROJECT_NAME}_test PRIVATE nlohmann_json::nlohmann_json)
 
 include(GoogleTest)
 
 # In order to properly locate the tests folder, we must provide the environment variable
 # SAMPLES_DIR. This should
-gtest_discover_tests(asynchronylib_test
+gtest_discover_tests(${CMAKE_PROJECT_NAME}_test
                      XML_OUTPUT_DIR "${PROJECT_SOURCE_DIR}/tests"
-					 PROPERTIES ENVIRONMENT "SAMPLES_DIR=${PROJECT_SOURCE_DIR}/tests/samples"
 )

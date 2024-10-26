@@ -57,5 +57,5 @@ TEST(periodic_worker, test1)
     // the wait on the semaphore is accurate.
     EXPECT_LE(44, passTest);
 
-    std::cerr << nlohmann::json(worker).dump() << std::endl;
+    std::cerr << worker.toJson().dump() << std::endl;
 }
