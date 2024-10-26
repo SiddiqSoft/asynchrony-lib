@@ -6,7 +6,7 @@ project(asynchronylib
         VERSION 0.0.0
         LANGUAGES CXX C
         HOMEPAGE_URL "%%myurl%%"
-        DESCRIPTION "asynchronylib SIP parser and encode header-only library"
+        DESCRIPTION "asynchronylib header-only library for some asynchronous worker pools"
 )
 
 if(WIN32)
@@ -16,10 +16,17 @@ if(WIN32)
   set(CMAKE_GENERATOR_TOOLSET "v143")
   set(CMAKE_VS_PLATFORM_TOOLSET_VERSION "14.41.34120")
 endif(WIN32)
+if(UNIX)
+  message(STATUS "Selecing generator")
+  set(CMAKE_GENERATOR "Unix Makefiles")
+endif(UNIX)
 
 message(STATUS "Require C++20")
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+
+message(STATUS "Require some C++ features")
+target_compile_features(mytarget PUBLIC cxx_std_20)
 
 message(STATUS "-- Importing git, gnuinstalldirs..")
 find_package(Git REQUIRED)
