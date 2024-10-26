@@ -59,3 +59,15 @@ TEST(periodic_worker, test1)
 
     std::cerr << worker.toJson().dump() << std::endl;
 }
+
+TEST(periodic_worker, nosleep_test2)
+{
+    uint64_t                    passTest {0};
+
+    siddiqsoft::periodic_worker worker {[&]() { passTest++; }, std::chrono::milliseconds(10)};
+
+    // We expect at least one iteration completed.
+    EXPECT_GE(1, passTest) << std::format("At least one iteration; completed: {}", passTest);
+
+    std::clog << worker.toJson().dump() << std::endl;
+}
