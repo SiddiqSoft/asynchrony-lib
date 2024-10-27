@@ -57,7 +57,7 @@ namespace siddiqsoft
     struct periodic_worker
     {
     public:
-        periodic_worker(periodic_worker&) = delete;
+        periodic_worker(periodic_worker&)  = delete;
         auto& operator=(periodic_worker&)  = delete;
         periodic_worker(periodic_worker&&) = delete;
         auto& operator=(periodic_worker&&) = delete;
@@ -76,7 +76,7 @@ namespace siddiqsoft
             // Empty signal to get our thread to wake up
             signal.release();
             try {
-                // Ask thread to shutdown
+                // Ask thread to shutdown and if joinable.. join.
                 if (processor.request_stop() && processor.joinable()) processor.join();
             }
             catch (const std::exception&) {
@@ -87,8 +87,11 @@ namespace siddiqsoft
         /// @brief Constructor requires the callback for the thread
         /// @param c The callback which accepts the type T as reference and performs action.
         /// @param interval The interval between each invocation
-        periodic_worker(std::function<void()> c, std::chrono::microseconds interval, const std::string& name={"anonymous-periodic-worker"})
+        periodic_worker(std::function<void()>     c,
+                        std::chrono::microseconds interval,
+                        const std::string&        name = {"anonymous-periodic-worker"})
             : callback(c)
+            , outstandingCallback(0)
             , invokePeriod(interval)
             , threadName(name)
         {
@@ -107,6 +110,7 @@ namespace siddiqsoft
 
             return {{"_typver"s, "siddiqsoft.asynchrony-lib.periodic_worker/0.10"s},
                     {"threadName", threadName},
+                    {"outstandingCallbacks", outstandingCallback.load()},
                     {"invokeCounter"s, invokeCounter},
                     {"threadPriority"s, Pri},
                     {"waitInterval"s, invokePeriod.count()}};
@@ -114,6 +118,9 @@ namespace siddiqsoft
 #endif
 
     private:
+        /// @brief Tracks the outstanding callback invocations so we can ensure that they are completed
+        ///        neatly prior to pool shutdown.
+        std::atomic_uint outstandingCallback {0};
         /// @brief Internal name of the worker thread (when supported the thread name displays in the debugger)
         std::string threadName {"anonymous-periodic-worker"};
         /// @brief Track number of times we've invoked the callback
@@ -146,8 +153,10 @@ namespace siddiqsoft
 
                     if (!st.stop_requested()) {
                         // Delegate to the callback outside the lock
+                        ++outstandingCallback;
                         callback();
                         invokeCounter++;
+                        --outstandingCallback;
                     }
                 }
                 catch (...) {

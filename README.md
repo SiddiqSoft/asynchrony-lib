@@ -18,6 +18,10 @@ asynchrony : Add asynchrony to your apps
 
 # Usage
 
+> Requires C++20 support!
+>
+> Specifically we require `jthread` and `stop_token` support which is unfortunately not available in the Apple Clang 16 version. This library works with gcc 14+ or MSVC 17+ or Clang 18+.
+
 Refer to the [documentation](https://siddiqsoft.github.io/asynchrony-lib/) for details.
 
 The library uses concepts to ensure the type `T` meets move construct requirements.

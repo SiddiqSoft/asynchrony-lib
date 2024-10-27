@@ -52,12 +52,12 @@ namespace siddiqsoft
     /// @brief Implements a simple queue + semaphore driven asynchronous processor
     /// @tparam T The data type for this processor
     /// @tparam Pri Optional thread priority level. 0=Normal
-    template <typename T, uint16_t Pri = 0>
-        requires((Pri >= -10) && (Pri <= 10))
-    &&std::move_constructible<T> struct simple_worker
+    template <typename T, int Pri = 0>
+        requires((Pri >= -10) && (Pri <= 10)) && std::move_constructible<T>
+    struct simple_worker
     {
     public:
-        simple_worker(simple_worker&) = delete;
+        simple_worker(simple_worker&)  = delete;
         auto operator=(simple_worker&) = delete;
 
 
@@ -122,11 +122,14 @@ namespace siddiqsoft
                     //{"semaphoreMax", signal.max()}, // conflicts with windows headers :-(
                     {"queueCounter", queueCounter},
                     {"threadPriority", Pri},
+                    {"outstandingCallback", outstandingCallback.load()},
                     {"waitInterval", signalWaitInterval.count()}};
         }
 #endif
 
     private:
+        /// @brief Check the outstanding callback
+        std::atomic_uint outstandingCallback {0};
         /// @brief Track number of times we've got items added into our queue
         uint64_t queueCounter {0};
         /// @brief The internal queue for this worker.
