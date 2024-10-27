@@ -12,35 +12,36 @@ trigger:
     exclude:
     - README.md
 
-strategy:
-  matrix:
-    Windows:
-      osName: Windows_NT
-      poolName: Default
-      poolImageName:
-    Linux:
-      osName: Linux
-      poolName: Default
-      poolImageName:
-
-variables:
-  buildConfiguration: 'Release'
-  buildLatestTag: '0.0.0'
-
-pool:
-  name: $(poolName)
-  vmImage: $(poolImageName)
-  demands:
-    - Agent.OS -equals $(osName)
-
 stages:
 - stage: Build
-  displayName: Building
+  displayName: Building Multiple OS
   jobs:
   - job: build
     displayName: Build
     workspace:
       clean: all
+
+    strategy:
+      matrix:
+        Windows:
+          osName: Windows_NT
+          poolName: Default
+          poolImageName:
+        Linux:
+          osName: Linux
+          poolName: Default
+          poolImageName:
+
+    variables:
+      buildConfiguration: 'Release'
+      buildLatestTag: '0.0.0'
+
+    pool:
+      name: $(poolName)
+      vmImage: $(poolImageName)
+      demands:
+        - Agent.OS -equals $(osName)
+
     steps:
     - checkout: self
       fetchDepth: 0
