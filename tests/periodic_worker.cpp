@@ -50,7 +50,7 @@ TEST(periodic_worker, test1)
 
     siddiqsoft::periodic_worker worker {[&]() { passTest++; }, std::chrono::milliseconds(100)};
 
-    while (passTest >= 44)
+    while (passTest <= 44)
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
     // We expect at least 50 iterations at a rate of one per 100ms with a test time of 5s.
@@ -67,8 +67,10 @@ TEST(periodic_worker, nosleep_test2)
 
     siddiqsoft::periodic_worker worker {[&]() {
                                             // this sleep will force the worker to terminate mid-call
+                                            std::cerr << "  Started......`" << __func__ << "`......" << std::endl;
                                             std::this_thread::sleep_for(std::chrono::seconds(2));
                                             passTest++;
+                                            std::cerr << "  Completed....`" << __func__ << "`......" << std::endl;
                                         },
                                         // run the above code every 50ms
                                         std::chrono::milliseconds(50)};

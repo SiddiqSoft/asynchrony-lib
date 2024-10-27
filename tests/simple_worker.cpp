@@ -59,7 +59,7 @@ TEST(simple_worker, test1)
     std::this_thread::sleep_for(std::chrono::seconds(1));
     EXPECT_TRUE(passTest);
 
-    std::cerr << nlohmann::json(worker).dump() << std::endl;
+    std::cerr << worker.toJson().dump() << std::endl;
 }
 
 
