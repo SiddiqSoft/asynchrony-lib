@@ -52,10 +52,10 @@ namespace siddiqsoft
         requires std::move_constructible<T>
     struct simple_pool
     {
-        simple_pool(simple_pool&&) = delete;
+        simple_pool(simple_pool&&)            = delete;
         simple_pool& operator=(simple_pool&&) = delete;
         simple_pool(simple_pool&)             = delete;
-        simple_pool& operator=(simple_pool&) = delete;
+        simple_pool& operator=(simple_pool&)  = delete;
 
 
         /// @brief Destructor.
@@ -71,7 +71,7 @@ namespace siddiqsoft
                 // Release the signal to indicate to the threads to abandon.
                 signal.release();
                 // Signal the threads to stop
-                t.request_stop();
+                if (t.request_stop() && t.joinable()) t.join();
             }
         }
 
@@ -148,7 +148,7 @@ namespace siddiqsoft
 
     private:
         std::vector<std::jthread> workers {};
-        std::function<void(T&&)>   callback;
+        std::function<void(T&&)>  callback;
         std::counting_semaphore<> signal {0};
         std::deque<T>             items {};
         std::shared_mutex         items_mutex;

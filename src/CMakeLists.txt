@@ -8,10 +8,13 @@ file(GLOB ${CMAKE_PROJECT_NAME}
 add_library(${CMAKE_PROJECT_NAME} INTERFACE)
 
 message(STATUS "CMake install directory: " ${CMAKE_INSTALL_INCLUDEDIR})
-
-target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC ${NLOHMANNJSON_INCLUDE_DIRS})
+message(STATUS "  $<BUILD_INTERFACE:${PROJECT_INCLUDE_DIR}>" $<BUILD_INTERFACE:${PROJECT_INCLUDE_DIR}> )
+message(STATUS "  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>" $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}> )
 
 target_include_directories(${CMAKE_PROJECT_NAME}
-                           INTERFACE
-                           $<BUILD_INTERFACE:${PROJECT_INCLUDE_DIR}>
-                           $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+                              PRIVATE
+                                   ${NLOHMANNJSON_INCLUDE_DIRS}
+                              PUBLIC
+                              INTERFACE
+                                   $<BUILD_INTERFACE:${PROJECT_INCLUDE_DIR}>
+                                   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)

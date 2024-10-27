@@ -50,7 +50,8 @@ TEST(periodic_worker, test1)
 
     siddiqsoft::periodic_worker worker {[&]() { passTest++; }, std::chrono::milliseconds(100)};
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(5500));
+    while (passTest >= 44)
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
     // We expect at least 50 iterations at a rate of one per 100ms with a test time of 5s.
     // This test is going to be tough since each VM configuration varies and the CPU frequency has a bearing on how "fast" or "lazy"
@@ -64,7 +65,13 @@ TEST(periodic_worker, nosleep_test2)
 {
     uint64_t                    passTest {0};
 
-    siddiqsoft::periodic_worker worker {[&]() { passTest++; }, std::chrono::milliseconds(10)};
+    siddiqsoft::periodic_worker worker {[&]() {
+                                            // this sleep will force the worker to terminate mid-call
+                                            std::this_thread::sleep_for(std::chrono::seconds(2));
+                                            passTest++;
+                                        },
+                                        // run the above code every 50ms
+                                        std::chrono::milliseconds(50)};
 
     // We expect at least one iteration completed.
     EXPECT_GE(1, passTest) << std::format("At least one iteration; completed: {}", passTest);
