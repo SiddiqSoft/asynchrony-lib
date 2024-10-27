@@ -82,11 +82,6 @@ stages:
         cmakeArgs: '--build . --config $(buildConfiguration)'
       condition: succeeded()
 
-- stage: Testing
-  jobs:
-  - job: Testing
-    displayName: Tests
-    steps:
     - task: CMake@1
       displayName: 'CMake -E chdir $(System.DefaultWorkingDirectory)/build/tests ctest'
       inputs:
@@ -104,11 +99,6 @@ stages:
       continueOnError: false
       condition: succeeded()
 
-- stage: packaging
-  jobs:
-  - job: Packing
-    displayName: Pack
-    steps:
     - task: NuGetCommand@2
       displayName: 'NuGet pack'
       inputs:
@@ -127,12 +117,6 @@ stages:
         publishFeedCredentials: 'sqs-nuget'
       condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), startsWith(variables['Agent.OS'], 'Windows'))
 
-- stage:
-  displayName: Releasing Stage
-  jobs:
-  - job: Releasing
-    displayName: Releasing
-    steps:
     - task: GitHubRelease@1
       inputs:
         gitHubConnection: 'github-packages-sqs'
