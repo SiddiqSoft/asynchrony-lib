@@ -8,7 +8,7 @@
 	-->
 	<metadata>
 		<!-- required: -->
-		<id>SiddiqSoft.asynchrony-lib</id>
+		<id>SiddiqSoft.asynchrony</id>
 		<version>$VERSION$</version>
 		<authors>SiddiqSoft</authors>
 		<description>Add asynchrony to your apps</description>
@@ -38,6 +38,6 @@
 		<file src="..\README.md" target="docs\" />
 
 		<!-- MSBuild .targets files -->
-		<file src="SiddiqSoft.asynchrony-lib.targets" target="build\native" />
+		<file src="SiddiqSoft.asynchrony.targets" target="build\native" />
 	</files>
 </package>

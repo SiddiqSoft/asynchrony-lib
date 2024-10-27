@@ -1,12 +1,10 @@
 asynchrony : Add asynchrony to your apps
 -------------------------------------------
 <!-- badges -->
-[![CodeQL](https://github.com/SiddiqSoft/asynchrony-lib/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/SiddiqSoft/asynchrony-lib/actions/workflows/codeql-analysis.yml)
-[![Build Status](https://dev.azure.com/siddiqsoft/siddiqsoft/_apis/build/status/SiddiqSoft.asynchrony-lib?branchName=main)](https://dev.azure.com/siddiqsoft/siddiqsoft/_build/latest?definitionId=17&branchName=main)
-![](https://img.shields.io/nuget/v/SiddiqSoft.asynchrony-lib)
-![](https://img.shields.io/github/v/tag/SiddiqSoft/asynchrony-lib)
+[![Build Status](https://dev.azure.com/siddiqsoft/siddiqsoft/_apis/build/status/SiddiqSoft.asynchrony?branchName=main)](https://dev.azure.com/siddiqsoft/siddiqsoft/_build/latest?definitionId=17&branchName=main)
+![](https://img.shields.io/nuget/v/SiddiqSoft.asynchrony)
+![](https://img.shields.io/github/v/tag/SiddiqSoft/asynchrony)
 ![](https://img.shields.io/azure-devops/tests/siddiqsoft/siddiqsoft/17)
-![](https://img.shields.io/azure-devops/coverage/siddiqsoft/siddiqsoft/17)
 <!-- end badges -->
 
 # Motivation
@@ -22,14 +20,14 @@ asynchrony : Add asynchrony to your apps
 >
 > Specifically we require `jthread` and `stop_token` support which is unfortunately not available in the Apple Clang 16 version. This library works with gcc 14+ or MSVC 17+ or Clang 18+.
 
-Refer to the [documentation](https://siddiqsoft.github.io/asynchrony-lib/) for details.
+Refer to the [documentation](https://siddiqsoft.github.io/asynchrony/) for details.
 
 The library uses concepts to ensure the type `T` meets move construct requirements.
 
 ## Single threaded worker
 
 ```cpp
-#include "siddiqsoft/asynchrony-lib.hpp"
+#include "siddiqsoft/simple_worker.hpp"
 
 // Define your data
 struct MyWork

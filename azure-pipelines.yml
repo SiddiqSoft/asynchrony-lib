@@ -112,14 +112,14 @@ steps:
 - task: GitHubRelease@1
   inputs:
     gitHubConnection: 'github-packages-sqs'
-    repositoryName: 'siddiqsoft/asynchrony-lib'
+    repositoryName: 'siddiqsoft/asynchrony'
     action: 'create'
     target: '$(Build.SourceVersion)'
     tagSource: 'userSpecifiedTag'
     tag: '$(build.buildNumber)'
     title: 'v$(build.buildNumber)'
     releaseNotesSource: 'inline'
-    releaseNotesInline: 'Documentation https://siddiqsoft.github.io/asynchrony-lib'
+    releaseNotesInline: 'Documentation https://siddiqsoft.github.io/asynchrony'
     isPreRelease: true
     changeLogCompareToRelease: 'lastFullRelease'
     changeLogType: 'commitBased'
