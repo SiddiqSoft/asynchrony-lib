@@ -1,7 +1,7 @@
-name: 'asynchronylib build'
+name: 'asynchrony build'
 
 trigger:
-  batch: true
+  batch: 'true'
   branches:
     include:
     - master
@@ -45,13 +45,13 @@ steps:
     versionSpec: '>=5.0.0-0'
     checkLatest: true
 
-- task: gitversion/setup@3
+- task: gitversion/setup@3.0.0
   displayName: 'Install GitVersion..'
   inputs:
     versionSpec: '6.x'
     preferLatestVersion: true
 
-- task: gitversion/execute@3
+- task: gitversion/execute@3.0.0
   displayName: 'Determine Version..'
   inputs:
     useConfigFile: true
