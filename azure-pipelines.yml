@@ -14,7 +14,7 @@ trigger:
 
 stages:
 - stage: Build
-  displayName: Building Multiple OS
+  displayName: Building Multiple OS, Testing, Publishing
   jobs:
   - job: build
     displayName: Build
