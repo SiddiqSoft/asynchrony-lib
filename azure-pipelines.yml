@@ -41,6 +41,7 @@ stages:
       vmImage: $(poolImageName)
       demands:
         - Agent.OS -equals $(osName)
+        - Agent.OSArchitecture -equals X64
 
     steps:
     - checkout: self
