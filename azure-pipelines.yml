@@ -116,7 +116,7 @@ stages:
         packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;build/*.nupkg'
         nuGetFeedType: 'external'
         publishFeedCredentials: 'sqs-nuget'
-      condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), startsWith(variables['Agent.OS'], 'Windows'))
+      condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['Build.SourceBranch'], 'refs/heads/master')), startsWith(variables['Agent.OS'], 'Windows'))
 
     - task: GitHubRelease@1
       inputs:
@@ -132,4 +132,4 @@ stages:
         isPreRelease: true
         changeLogCompareToRelease: 'lastFullRelease'
         changeLogType: 'commitBased'
-      condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), startsWith(variables['Agent.OS'], 'Windows'))
+      condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['Build.SourceBranch'], 'refs/heads/master')), startsWith(variables['Agent.OS'], 'Windows'))
