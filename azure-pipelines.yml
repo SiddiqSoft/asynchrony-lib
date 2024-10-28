@@ -1,5 +1,3 @@
-name: 'asynchrony build'
-
 trigger:
   batch: 'true'
   branches:
@@ -14,114 +12,123 @@ trigger:
     exclude:
     - README.md
 
-strategy:
-  matrix:
-    Windows:
-      osName: Windows_NT
-      poolName: Default
-      poolImageName:
-    Linux:
-      osName: Linux
-      poolName: Default
-      poolImageName:
+stages:
+- stage: Build
+  displayName: Building Multiple OS, Testing, Publishing
+  jobs:
+  - job: build
+    displayName: Build
+    workspace:
+      clean: all
 
-variables:
-  buildConfiguration: 'Release'
-  buildLatestTag: '0.0.0'
+    strategy:
+      matrix:
+        Windows:
+          osName: Windows_NT
+          poolName: Default
+          poolImageName:
+        Linux:
+          osName: Linux
+          poolName: Default
+          poolImageName:
 
-pool:
-  name: $(poolName)
-  vmImage: $(poolImageName)
-  demands:
-    - Agent.OS -equals $(osName)
+    variables:
+      buildConfiguration: 'Release'
+      buildLatestTag: '0.0.0'
 
-steps:
-- checkout: self
-  fetchDepth: 0
-  clean: true
+    pool:
+      name: $(poolName)
+      vmImage: $(poolImageName)
+      demands:
+        - Agent.OS -equals $(osName)
 
-- task: NuGetToolInstaller@1
-  displayName: 'Install Nuget'
-  inputs:
-    versionSpec: '>=5.0.0-0'
-    checkLatest: true
+    steps:
+    - checkout: self
+      fetchDepth: 0
+      clean: true
 
-- task: gitversion/setup@3.0.0
-  displayName: 'Install GitVersion..'
-  inputs:
-    versionSpec: '6.x'
-    preferLatestVersion: true
+    - task: NuGetToolInstaller@1
+      displayName: 'Install Nuget'
+      inputs:
+        versionSpec: '>=5.0.0-0'
+        checkLatest: true
 
-- task: gitversion/execute@3.0.0
-  displayName: 'Determine Version..'
-  inputs:
-    useConfigFile: true
-    configFilePath: 'GitVersion.yml'
+    - task: gitversion/setup@3.0.0
+      displayName: 'Install GitVersion..'
+      inputs:
+        versionSpec: '6.x'
+        preferLatestVersion: true
 
-- script: echo %Action%%BuildVersion%
-  displayName: 'Set build version to $(GitVersion.MajorMinorPatch)'
-  env:
-    Action: '##vso[build.updatebuildnumber]'
-    BuildVersion: $(GitVersion.MajorMinorPatch)
+    - task: gitversion/execute@3.0.0
+      displayName: 'Determine Version..'
+      inputs:
+        useConfigFile: true
+        configFilePath: 'GitVersion.yml'
 
-- task: CMake@1
-  displayName: 'CMake ..'
-  inputs:
-    cmakeArgs: '..'
+    - script: echo %Action%%BuildVersion%
+      displayName: 'Set build version to $(GitVersion.MajorMinorPatch)'
+      env:
+        Action: '##vso[build.updatebuildnumber]'
+        BuildVersion: $(GitVersion.MajorMinorPatch)
 
-- task: CMake@1
-  displayName: 'CMake --build . --config $(buildConfiguration)'
-  inputs:
-    cmakeArgs: '--build . --config $(buildConfiguration)'
-  condition: succeeded()
+    - task: CMake@1
+      displayName: 'CMake ..'
+      inputs:
+        cmakeArgs: '..'
 
-- task: CMake@1
-  displayName: 'CMake -E chdir $(System.DefaultWorkingDirectory)/build/tests ctest'
-  inputs:
-    cmakeArgs: '-E chdir $(System.DefaultWorkingDirectory)/build/tests ctest . --output-junit $(System.DefaultWorkingDirectory)/build/tests/results/test_detail.xml --output-on-failure'
-  condition: succeeded()
-  continueOnError: true
+    - task: CMake@1
+      displayName: 'CMake --build . --config $(buildConfiguration)'
+      inputs:
+        cmakeArgs: '--build . --config $(buildConfiguration)'
+      condition: succeeded()
 
-- task: PublishTestResults@2
-  displayName: 'Publish $(buildConfiguration) Test Results test_detail.xml'
-  inputs:
-    testResultsFormat: 'JUnit'
-    testResultsFiles: '$(System.DefaultWorkingDirectory)/build/tests/results/test_detail.xml'
-    mergeTestResults: true
-    buildConfiguration: '$(buildConfiguration)'
-  continueOnError: false
-  condition: succeeded()
+    - task: CMake@1
+      displayName: 'CMake -E chdir $(System.DefaultWorkingDirectory)/build/tests ctest'
+      inputs:
+        cmakeArgs: '-E chdir $(System.DefaultWorkingDirectory)/build/tests ctest . --output-junit $(System.DefaultWorkingDirectory)/build/tests/results/test_detail.xml --output-on-failure'
+      condition: succeeded()
+      continueOnError: true
 
-- task: NuGetCommand@2
-  displayName: 'NuGet pack'
-  inputs:
-    command: 'pack'
-    packagesToPack: 'nuget/*.nuspec'
-    versioningScheme: 'off'
-    buildProperties: 'VERSION=$(GitVersion.MajorMinorPatch)'
-  condition: and(succeeded(), startsWith(variables['Agent.OS'], 'Windows'))
+    - task: PublishTestResults@2
+      displayName: 'Publish $(buildConfiguration) Test Results test_detail.xml'
+      inputs:
+        testResultsFormat: 'JUnit'
+        testResultsFiles: '$(System.DefaultWorkingDirectory)/build/tests/results/test_detail.xml'
+        mergeTestResults: true
+        buildConfiguration: '$(buildConfiguration)'
+      continueOnError: false
+      condition: succeeded()
 
-- task: NuGetCommand@2
-  displayName: 'NuGet push'
-  inputs:
-    command: 'push'
-    packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;build/*.nupkg'
-    nuGetFeedType: 'external'
-    publishFeedCredentials: 'sqs-nuget'
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), startsWith(variables['Agent.OS'], 'Windows'))
+    - task: NuGetCommand@2
+      displayName: 'NuGet pack'
+      inputs:
+        command: 'pack'
+        packagesToPack: 'nuget/*.nuspec'
+        versioningScheme: 'off'
+        buildProperties: 'VERSION=$(GitVersion.MajorMinorPatch)'
+      condition: and(succeeded(), startsWith(variables['Agent.OS'], 'Windows'))
 
-- task: GitHubRelease@1
-  inputs:
-    gitHubConnection: 'github-packages-sqs'
-    repositoryName: 'siddiqsoft/asynchrony'
-    action: 'create'
-    target: '$(Build.SourceVersion)'
-    tagSource: 'userSpecifiedTag'
-    tag: '$(build.buildNumber)'
-    title: 'v$(build.buildNumber)'
-    releaseNotesSource: 'inline'
-    releaseNotesInline: 'Documentation https://siddiqsoft.github.io/asynchrony'
-    isPreRelease: true
-    changeLogCompareToRelease: 'lastFullRelease'
-    changeLogType: 'commitBased'
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), startsWith(variables['Agent.OS'], 'Windows'))
+    - task: NuGetCommand@2
+      displayName: 'NuGet push'
+      inputs:
+        command: 'push'
+        packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;build/*.nupkg'
+        nuGetFeedType: 'external'
+        publishFeedCredentials: 'sqs-nuget'
+      condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), startsWith(variables['Agent.OS'], 'Windows'))
+
+    - task: GitHubRelease@1
+      inputs:
+        gitHubConnection: 'github-packages-sqs'
+        repositoryName: 'siddiqsoft/asynchrony'
+        action: 'create'
+        target: '$(Build.SourceVersion)'
+        tagSource: 'userSpecifiedTag'
+        tag: '$(build.buildNumber)'
+        title: 'v$(build.buildNumber)'
+        releaseNotesSource: 'inline'
+        releaseNotesInline: 'Documentation https://siddiqsoft.github.io/asynchrony'
+        isPreRelease: true
+        changeLogCompareToRelease: 'lastFullRelease'
+        changeLogType: 'commitBased'
+      condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'), startsWith(variables['Agent.OS'], 'Windows'))
