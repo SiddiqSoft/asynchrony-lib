@@ -1,59 +1,55 @@
+#   SiddiqSoft CMakeLists 
+#   Copyright 2024 Abdulkareem Siddiq. All rights reserved.
+#   See LICENSE file
+#
+#   When building from our CI server, the following options must be set
+#   BUILD_TESTS ON
+#   CI_BUILDID must be set to the gitversion
+# 
 cmake_minimum_required(VERSION 3.25)
 
-# The project version is updated below with the tag from git
-#   We need to support "C" language in order for the googletest to build.
-project(asynchrony
-        VERSION 0.0.0
-        LANGUAGES CXX C
-        HOMEPAGE_URL "%%myurl%%"
-        DESCRIPTION "${CMAKE_PROJECT_NAME} header-only library for some asynchronous worker pools"
-)
+# _________________
+# Version detection; must preceed the declaration of the actual project()
+# Figures out the value ${CURRENT_PROJECT_VERSION} and therefore the ${PROJECT_VERSION}
+# Brings in the CPM module into pack/CPM.make
+include(pack/CMakeCommonHelpers.cmake)
 
-if(WIN32)
-  message(STATUS "Selecting Visual Studio as generator")
-  set(CMAKE_GENERATOR "Visual Studio 17 2022")
-  set(CMAKE_GENERATOR_PLATFORM "x64,version=10.0.22621.0")
-  set(CMAKE_GENERATOR_TOOLSET "v143")
-  set(CMAKE_VS_PLATFORM_TOOLSET_VERSION "14.41.34120")
-endif(WIN32)
+# ______________________
+# Project Metadata block
+project(AzureCppUtils
+        VERSION         "${CURRENT_PROJECT_VERSION}"
+        LANGUAGES       CXX
+        HOMEPAGE_URL    "%%myurl%%"
+        DESCRIPTION     "Azure REST API Helpers for Modern C++. Featuring helper functions for date-time, encryption tokens for Azure REST API as a single header-only package and native Win32 libraries.")
 
-message(STATUS "Require C++20")
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-message(STATUS "-- Importing git, gnuinstalldirs..")
-find_package(Git REQUIRED)
-include(FetchContent)
-include(GNUInstallDirs)
+# ____________________________________
+# Options; define and declare defaults
+option(${PROJECT_NAME}_BUILD_TESTS "${PROJECT_NAME} - Build tests. Uncheck for install only runs" OFF)
+option(${${PROJECT_NAME}_BUILD_TESTS} "${PROJECT_NAME} - Build tests. Uncheck for install only runs" OFF)
 
-message(STATUS "-- Importing the nlohmann package directly..")
-FetchContent_Declare(
-    nlohmann_json
-    GIT_REPOSITORY https://github.com/nlohmann/json.git
-    GIT_TAG v3.11.3
-    GIT_SHALLOW TRUE
-    GIT_NO_TAGS TRUE
-)
-# Get the googletest
-FetchContent_Declare(googletest
-					GIT_REPOSITORY https://github.com/google/googletest.git
-					GIT_TAG	v1.15.2
-				    GIT_SHALLOW TRUE
-					GIT_NO_TAGS TRUE
-)
+# ____________________________________
+#  Library Definition
+add_library(${PROJECT_NAME} INTERFACE)
+add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
-FetchContent_MakeAvailable(googletest nlohmann_json)
+target_include_directories(${PROJECT_NAME}
+                            INTERFACE
+                            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
+target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_20)
 
-message(STATUS "-- Going for the src..")
-add_subdirectory("src")
 
-message(STATUS "-- The project source directory............: ${PROJECT_SOURCE_DIR}")
-message(STATUS "-- The PROJECT_BINARY_DIR directory........: ${PROJECT_BINARY_DIR}")
-message(STATUS "-- The CMAKE_CURRENT_BINARY_DIR directory..: ${CMAKE_CURRENT_BINARY_DIR}")
-message(STATUS "-- The CMAKE_BINARY_DIR directory..........: ${CMAKE_BINARY_DIR}")
-message(STATUS "-- The CMAKE_RUNTIME_OUTPUT_DIRECTORY......: ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+# ____________________________________
+# Dependencies
+cpmaddpackage("gh:siddiqsoft/RunOnEnd#main")
+target_link_libraries(${PROJECT_NAME} INTERFACE RunOnEnd::RunOnEnd)
 
-message(STATUS "The test..")
-include(CTest)
-enable_testing()
-add_subdirectory("tests")
+# ____________________________________
+# Testing
+# Available only when building in our repo; controlled by the switch: ${PROJECT_NAME}_BUILD_TESTS = ON
+if(${${PROJECT_NAME}_BUILD_TESTS} AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests" AND IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/tests" )
+    message(STATUS "${PROJECT_NAME} - Asked to build tests.. ${PROJECT_NAME}_BUILD_TESTS = ${${PROJECT_NAME}_BUILD_TESTS}")
+    enable_testing()
+    add_subdirectory(tests)
+endif()
