@@ -42,7 +42,7 @@
 #include <barrier>
 
 #include "nlohmann/json.hpp"
-#include "../src/simple_pool.hpp"
+#include "../include/siddiqsoft/simple_pool.hpp"
 
 TEST(simple_pool, test1)
 {

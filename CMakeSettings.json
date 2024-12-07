@@ -14,7 +14,7 @@
     {
       "name": "x64-Release",
       "generator": "Visual Studio 17 2022 Win64",
-      "configurationType": "Release",
+      "configurationType": "RelWithDebInfo",
       "buildRoot": "${projectDir}\\out\\build\\${name}",
       "installRoot": "${projectDir}\\out\\install\\${name}",
       "cmakeCommandArgs": "",
@@ -23,7 +23,7 @@
       "inheritEnvironments": [ "msvc_x64_x64" ]
     },
     {
-      "name": "Linux-AMD64-Clang-Debug",
+      "name": "Linux-Clang-Debug",
       "generator": "Unix Makefiles",
       "configurationType": "Debug",
       "cmakeExecutable": "cmake",
@@ -39,11 +39,10 @@
       "remoteCopySources": true,
       "rsyncCommandArgs": "-t --delete",
       "remoteCopyBuildOutput": false,
-      "remoteCopySourcesMethod": "rsync",
-      "addressSanitizerEnabled": true
+      "remoteCopySourcesMethod": "rsync"
     },
     {
-      "name": "Linux-AMD64-Clang-Release",
+      "name": "Linux-Clang-Release",
       "generator": "Unix Makefiles",
       "configurationType": "RelWithDebInfo",
       "cmakeExecutable": "cmake",
@@ -59,7 +58,8 @@
       "remoteCopySources": true,
       "rsyncCommandArgs": "-t --delete",
       "remoteCopyBuildOutput": false,
-      "remoteCopySourcesMethod": "rsync"
+      "remoteCopySourcesMethod": "rsync",
+      "variables": []
     }
   ]
 }

@@ -41,7 +41,7 @@
 #include <thread>
 
 #include "nlohmann/json.hpp"
-#include "../src/periodic_worker.hpp"
+#include "../include/siddiqsoft/periodic_worker.hpp"
 
 
 TEST(periodic_worker, test1)
