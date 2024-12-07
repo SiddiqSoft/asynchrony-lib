@@ -202,14 +202,14 @@ stages:
       displayName: 'Release to GitHub'
       inputs:
         gitHubConnection: 'github-packages-sqs'
-        repositoryName: 'siddiqsoft/AzureCppUtils'
+        repositoryName: 'siddiqsoft/asynchrony'
         action: 'create'
         target: '$(Build.SourceVersion)'
         tagSource: 'userSpecifiedTag'
         tag: '$(GitVersion.MajorMinorPatch)'
         title: 'v$(GitVersion.MajorMinorPatch)'
         releaseNotesSource: 'inline'
-        releaseNotesInline: 'Documentation https://github.com/SiddiqSoft/AzureCppUtils'
+        releaseNotesInline: 'Documentation https://github.com/SiddiqSoft/asynchrony'
         isPreRelease: true
         changeLogCompareToRelease: 'lastFullRelease'
         changeLogType: 'commitBased'
