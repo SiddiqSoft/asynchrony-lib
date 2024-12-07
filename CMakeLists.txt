@@ -16,11 +16,11 @@ include(pack/CMakeCommonHelpers.cmake)
 
 # ______________________
 # Project Metadata block
-project(AzureCppUtils
+project(asynchrony
         VERSION         "${CURRENT_PROJECT_VERSION}"
         LANGUAGES       CXX
         HOMEPAGE_URL    "%%myurl%%"
-        DESCRIPTION     "Azure REST API Helpers for Modern C++. Featuring helper functions for date-time, encryption tokens for Azure REST API as a single header-only package and native Win32 libraries.")
+        DESCRIPTION     "Classes to allow you to build asynchrony in your applications using standard C++ jthread, semaphore, deque")
 
 
 # ____________________________________
@@ -42,8 +42,6 @@ target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_20)
 
 # ____________________________________
 # Dependencies
-cpmaddpackage("gh:siddiqsoft/RunOnEnd#main")
-target_link_libraries(${PROJECT_NAME} INTERFACE RunOnEnd::RunOnEnd)
 
 # ____________________________________
 # Testing

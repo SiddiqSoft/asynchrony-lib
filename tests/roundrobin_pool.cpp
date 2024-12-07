@@ -42,7 +42,7 @@
 #include <vector>
 
 #include "nlohmann/json.hpp"
-#include "../src/roundrobin_pool.hpp"
+#include "../include/siddiqsoft/roundrobin_pool.hpp"
 
 
 TEST(roundrobin_pool, test1)

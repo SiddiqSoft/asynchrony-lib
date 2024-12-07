@@ -41,7 +41,7 @@
 #include <thread>
 
 #include "nlohmann/json.hpp"
-#include "../src/simple_worker.hpp"
+#include "../include/siddiqsoft/simple_worker.hpp"
 
 
 TEST(simple_worker, test1)

@@ -10,7 +10,7 @@
             "hidden": true,
             "cacheVariables": {
                 "CPM_SOURCE_CACHE": "${sourceParentDir}/.cpmcache",
-                "AzureCppUtils_BUILD_TESTS": "ON"
+                "asynchrony_BUILD_TESTS": "ON"
             }
         },
         {
@@ -23,6 +23,7 @@
                 "CMAKE_INSTALL_PREFIX": "${sourceDir}/install/${presetName}",
                 "CMAKE_C_COMPILER": "/opt/homebrew/opt/llvm/bin/clang",
                 "CMAKE_CXX_COMPILER": "/opt/homebrew/opt/llvm/bin/clang++",
+                "CMAKE_CXX_FLAGS": "-fexperimental-library",
                 "CMAKE_BUILD_TYPE": "Debug"
             },
             "condition": {
@@ -41,6 +42,7 @@
                 "CMAKE_INSTALL_PREFIX": "${sourceDir}/install/${presetName}",
                 "CMAKE_C_COMPILER": "/opt/homebrew/opt/llvm/bin/clang",
                 "CMAKE_CXX_COMPILER": "/opt/homebrew/opt/llvm/bin/clang++",
+                "CMAKE_CXX_FLAGS": "-fexperimental-library",
                 "CMAKE_BUILD_TYPE": "Release"
             },
             "condition": {

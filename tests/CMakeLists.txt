@@ -8,11 +8,16 @@ if(${${PROJECT_NAME}_BUILD_TESTS})
                             $<$<CXX_COMPILER_ID:MSVC>:/std:c++20> )
     target_sources( ${TESTPROJ}
                     PRIVATE
-                    ${PROJECT_SOURCE_DIR}/tests/test.cpp)
+                    ${PROJECT_SOURCE_DIR}/tests/periodic_worker.cpp
+                    ${PROJECT_SOURCE_DIR}/tests/roundrobin_pool.cpp
+                    ${PROJECT_SOURCE_DIR}/tests/simple_pool.cpp
+                    ${PROJECT_SOURCE_DIR}/tests/simple_worker.cpp)
 
     # Dependencies
     cpmaddpackage("gh:google/googletest#v1.15.2")
-    target_link_libraries(${TESTPROJ} PRIVATE GTest::gtest_main RunOnEnd::RunOnEnd)
+    target_link_libraries(${TESTPROJ} PRIVATE GTest::gtest_main)
+    cpmaddpackage("gh:nlohmann/json#v3.11.3")
+    target_link_libraries(${TESTPROJ} PRIVATE nlohmann_json::nlohmann_json)
 
 
     include(GoogleTest)
