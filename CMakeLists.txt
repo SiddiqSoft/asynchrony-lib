@@ -39,6 +39,11 @@ target_include_directories(${PROJECT_NAME}
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_20)
 
+# For std::stop_token and std::jthread on Clang 18 and Clang 19 we need to enable
+# the experimental-library flag.
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    target_compile_options(${PROJECT_NAME} INTERFACE -fexperimental-library)
+endif()
 
 # ____________________________________
 # Dependencies

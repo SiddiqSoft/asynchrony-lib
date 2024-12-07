@@ -23,7 +23,6 @@
                 "CMAKE_INSTALL_PREFIX": "${sourceDir}/install/${presetName}",
                 "CMAKE_C_COMPILER": "/opt/homebrew/opt/llvm/bin/clang",
                 "CMAKE_CXX_COMPILER": "/opt/homebrew/opt/llvm/bin/clang++",
-                "CMAKE_CXX_FLAGS": "-fexperimental-library",
                 "CMAKE_BUILD_TYPE": "Debug"
             },
             "condition": {
@@ -42,7 +41,6 @@
                 "CMAKE_INSTALL_PREFIX": "${sourceDir}/install/${presetName}",
                 "CMAKE_C_COMPILER": "/opt/homebrew/opt/llvm/bin/clang",
                 "CMAKE_CXX_COMPILER": "/opt/homebrew/opt/llvm/bin/clang++",
-                "CMAKE_CXX_FLAGS": "-fexperimental-library",
                 "CMAKE_BUILD_TYPE": "Release"
             },
             "condition": {

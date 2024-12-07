@@ -123,6 +123,9 @@ void main()
 }
 ```
 
+## Implementation note
+In order to use `std::jthread` on Clang 18 and Clang 19, we enable the compiler flag `"CMAKE_CXX_FLAGS": "-fexperimental-library"` in the CMakeLists.txt. This option will show up in your client library under Clang compilers.
+
 <p align="right">
 &copy; 2021 Siddiq Software LLC. All rights reserved.
 </p>
