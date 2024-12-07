@@ -6,6 +6,10 @@ if(${${PROJECT_NAME}_BUILD_TESTS})
     target_compile_options( ${TESTPROJ}
                             PRIVATE
                             $<$<CXX_COMPILER_ID:MSVC>:/std:c++20> )
+    target_compile_options( ${TESTPROJ}
+                            PRIVATE
+                            $<$<CXX_COMPILER_ID:Clang>:-fexperimental-library> )
+
     target_sources( ${TESTPROJ}
                     PRIVATE
                     ${PROJECT_SOURCE_DIR}/tests/periodic_worker.cpp
