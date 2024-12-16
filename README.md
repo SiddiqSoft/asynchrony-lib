@@ -122,17 +122,7 @@ void main()
    std::this_thread::sleep_for(1s);
 }
 ```
-## Defer to Scope (Scope Guard)
 
-```cpp
-#include "siddiqsoft/defer.hpp"
-
-void func(){
-    siddiqsoft::defer onEnd([&](){ std::cout << "End of scope."; });
-    .
-    .
-}
-```
 
 ## Implementation note
 In order to use `std::jthread` on Clang 18 and Clang 19, we enable the compiler flag `"CMAKE_CXX_FLAGS": "-fexperimental-library"` in the CMakeLists.txt. This option will show up in your client library under Clang compilers.
