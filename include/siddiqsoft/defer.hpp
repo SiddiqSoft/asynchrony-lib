@@ -33,24 +33,23 @@
  */
 
 #pragma once
-#include <type_traits>
 #ifndef DEFER_HPP
 #define DEFER_HPP
 
-
+#include <type_traits>
 #include <functional>
 
 namespace siddiqsoft
 {
-    template <typename C>
+    template <typename Func = std::function<void>>
     struct defer
     {
     private:
-        C callback;
+        Func callback;
 
     public:
-        defer(C&& f)
-            : callback(std::move(f)) { };
+        defer(Func&& f)
+            : callback(std::move(f)) {};
         ~defer() { callback(); }
     };
 

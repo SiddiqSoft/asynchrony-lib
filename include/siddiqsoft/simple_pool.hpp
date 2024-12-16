@@ -49,7 +49,7 @@ namespace siddiqsoft
     /// @remarks The number of threads in the pool is determined by the nature of your "work". If you're spending time against db
     /// then you might wish to use more threads as individual queries might take time and hog the thread.
     template <typename T, uint16_t N = 0>
-        requires std::is_move_constructible<T>
+        requires std::is_move_constructible_v<T>
     struct simple_pool
     {
         simple_pool(simple_pool&&)            = delete;
@@ -97,7 +97,7 @@ namespace siddiqsoft
                             // The getNextItem performs the wait on the signal and if it expires, returns empty.
                             // If there is an item, it will get that item (minimizing move) and performs the pop
                             // and returns the item so we can invoke the callback outside the lock.
-                            if (auto item = getNextItem(signalWaitInterval); item && !st.stop_requested()) {
+                            if (auto item = getNextItem(signalWaitInterval); item.has_value() && !st.stop_requested()) {
                                 // Delegate to the callback outside the lock
                                 callback(std::move(*item));
                             }
@@ -116,7 +116,7 @@ namespace siddiqsoft
             {
                 std::unique_lock<std::shared_mutex> myWriterLock(items_mutex);
 
-                items.emplace_back(std::move(item));
+                items.emplace_back(std::forward<T>(item));
             }
             signal.release();
             ++queueCounter;

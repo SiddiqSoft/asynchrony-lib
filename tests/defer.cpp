@@ -49,7 +49,7 @@ TEST(defer, test1)
     uint64_t passTest {0};
 
     {
-        siddiqsoft::defer {[&]() { passTest++; }, std::chrono::milliseconds(100)};
+        siddiqsoft::defer onEnd([&]() { passTest++; });
     }
 
     EXPECT_EQ(1, passTest);
@@ -61,7 +61,7 @@ TEST(defer, test2)
 
     try
     {
-        siddiqsoft::defer {[&]() { passTest++; }, std::chrono::milliseconds(100)};
+        siddiqsoft::defer OnEnd([&]() { passTest++; });
         throw;
     }catch(...){}
 
