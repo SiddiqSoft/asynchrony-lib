@@ -46,7 +46,7 @@
 #include <semaphore>
 #include <stop_token>
 
-#include "defer.hpp"
+#include "siddiqsoft/RunOnEnd.hpp"
 
 
 namespace siddiqsoft
@@ -181,7 +181,7 @@ namespace siddiqsoft
             if (signal.try_acquire_for(signalWaitInterval)) {
                 // Guard against empty signals which are terminating indicator
                 if (std::unique_lock<std::shared_mutex> myWriterLock(items_mutex); !items.empty()) {
-                    defer onScopeExit([&]() { items.pop_front(); });
+                    RunOnEnd onScopeExit([&]() { items.pop_front(); });
                     // WE require that the stored type by move-constructible!
                     return std::move(items.front());
                     // The pop_front() happens on scope exit
