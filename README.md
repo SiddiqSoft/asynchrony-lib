@@ -12,7 +12,6 @@ asynchrony : Add asynchrony to your apps
 - The code here is a set of helpers that utilize the underlying deque, semaphore, mutex features found in std.
 - Be instructive while providing functional code
 - Use only C++20 standard code: jthread, deque, semaphore, barriers and latch
-- No external dependency
 
 # Usage
 
