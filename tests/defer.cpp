@@ -37,6 +37,7 @@
 
 #include <iostream>
 #include <format>
+#include <stdexcept>
 #include <string>
 #include <thread>
 
@@ -59,11 +60,16 @@ TEST(defer, test2)
 {
     uint64_t passTest {0};
 
-    try
-    {
-        siddiqsoft::defer OnEnd([&]() { passTest++; });
-        throw;
-    }catch(...){}
+    auto     f = [&]() noexcept(false) {
+        siddiqsoft::defer OnEnd([&]() {
+            passTest++;
+            std::cerr << "Cleanup on exit." << std::endl;
+        });
+        std::cerr << "About to throw..\n";
+        passTest = 0;
+        throw std::runtime_error("expected error");
+    };
+    EXPECT_THROW(f(), std::runtime_error);
 
     EXPECT_EQ(1, passTest);
 }

@@ -49,8 +49,14 @@ namespace siddiqsoft
 
     public:
         defer(Func&& f)
-            : callback(std::move(f)) {};
-        ~defer() { callback(); }
+            : callback(std::move(f)) { };
+        ~defer()
+        {
+#if defined(DEBUG) || defined(_DEBUG)
+            std::cerr << "Invoking callback on exit..\n";
+#endif
+            callback();
+        }
     };
 
 } // namespace siddiqsoft

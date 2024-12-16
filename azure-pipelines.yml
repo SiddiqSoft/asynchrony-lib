@@ -39,11 +39,11 @@ stages:
           poolName: Default
           poolImageName:
           cmake.preset: Windows-Release
-        #Linux:
-        #  osName: Linux
-        #  poolName: Default
-        #  poolImageName:
-        #  cmake.preset: Linux-Release
+        Linux:
+          osName: Linux
+          poolName: Default
+          poolImageName:
+          cmake.preset: Linux-Release
 
     pool:
       name: $(poolName)
@@ -148,11 +148,11 @@ stages:
           poolName: Default
           poolImageName:
           cmake.preset: Windows-Release
-        #Linux:
-        #  osName: Linux
-        #  poolName: Default
-        #  poolImageName:
-        #  cmake.preset: Linux-Release
+        Linux:
+          osName: Linux
+          poolName: Default
+          poolImageName:
+          cmake.preset: Linux-Release
 
     pool:
       name: $(poolName)
