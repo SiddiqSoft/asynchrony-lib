@@ -93,7 +93,7 @@ stages:
       displayName: 'CMake Tests $(cmake.preset)'
       inputs:
         cmakeArgs: '-E chdir $(System.DefaultWorkingDirectory)/build/$(cmake.preset)/tests ctest $(System.DefaultWorkingDirectory)/build/$(cmake.preset)/tests --output-junit $(System.DefaultWorkingDirectory)/build/$(cmake.preset)/tests/results/test_detail.xml --output-on-failure'
-      condition: and(succeeded(), NOT startsWith(variables['Agent.OS'], 'Linux'))
+      condition: and(succeeded(), startsWith(variables['Agent.OS'], 'Windows'))
       continueOnError: false
 
     # Try for coverage (but only on Linux build machines)
