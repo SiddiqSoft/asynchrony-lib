@@ -37,7 +37,6 @@ if(${${PROJECT_NAME}_BUILD_TESTS})
     target_link_libraries(${TESTPROJ} PRIVATE GTest::gtest_main)
     cpmaddpackage("gh:nlohmann/json#v3.11.3")
     target_link_libraries(${TESTPROJ} PRIVATE nlohmann_json::nlohmann_json)
-    # cpmaddpackage("gh:siddiqsoft/RunOnEnd#1.3.2.0")
     target_link_libraries(${TESTPROJ} PRIVATE RunOnEnd::RunOnEnd)
     
     include(GoogleTest)
