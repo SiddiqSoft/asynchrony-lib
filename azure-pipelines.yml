@@ -39,11 +39,11 @@ stages:
           poolName: Default
           poolImageName:
           cmake.preset: Windows-Release
-        #Linux:
-        #  osName: Linux
-        #  poolName: Default
-        #  poolImageName:
-        #  cmake.preset: Linux-Release
+        Linux:
+          osName: Linux
+          poolName: Default
+          poolImageName:
+          cmake.preset: Linux-Release
 
     pool:
       name: $(poolName)
@@ -62,13 +62,13 @@ stages:
         versionSpec: '>=6.0.0-0'
         checkLatest: true
 
-    - task: gitversion/setup@3.0.0
+    - task: gitversion/setup@3
       displayName: 'Install GitVersion..'
       inputs:
-        versionSpec: '6.x'
+        versionSpec: '6.0'
         preferLatestVersion: true
 
-    - task: gitversion/execute@3.0.0
+    - task: gitversion/execute@3
       displayName: 'Determine Version..'
       name: version_step
       inputs:
@@ -93,14 +93,14 @@ stages:
       displayName: 'CMake Tests $(cmake.preset)'
       inputs:
         cmakeArgs: '-E chdir $(System.DefaultWorkingDirectory)/build/$(cmake.preset)/tests ctest $(System.DefaultWorkingDirectory)/build/$(cmake.preset)/tests --output-junit $(System.DefaultWorkingDirectory)/build/$(cmake.preset)/tests/results/test_detail.xml --output-on-failure'
-      condition: succeeded()
+      condition: and(succeeded(), startsWith(variables['Agent.OS'], 'Windows'))
       continueOnError: false
 
     # Try for coverage (but only on Linux build machines)
     - task: CMake@1
       displayName: 'CTest Coverage $(cmake.preset) (Linux only)'
       inputs:
-        cmakeArgs: '-E chdir $(System.DefaultWorkingDirectory)/build/$(cmake.preset) ctest --preset $(cmake.preset) --output-junit $(System.DefaultWorkingDirectory)/build/$(cmake.preset)/tests/results/test_detail.xml --output-on-failure  -T Test -T Coverage'
+        cmakeArgs: '-E chdir $(System.DefaultWorkingDirectory)/build/$(cmake.preset) ctest $(System.DefaultWorkingDirectory)/build/$(cmake.preset)/tests --output-junit $(System.DefaultWorkingDirectory)/build/$(cmake.preset)/tests/results/test_detail.xml --output-on-failure  -T Test -T Coverage'
       condition: and(succeeded(), startsWith(variables['Agent.OS'], 'Linux'))
       continueOnError: false
 
@@ -148,11 +148,11 @@ stages:
           poolName: Default
           poolImageName:
           cmake.preset: Windows-Release
-        #Linux:
-        #  osName: Linux
-        #  poolName: Default
-        #  poolImageName:
-        #  cmake.preset: Linux-Release
+        Linux:
+          osName: Linux
+          poolName: Default
+          poolImageName:
+          cmake.preset: Linux-Release
 
     pool:
       name: $(poolName)
@@ -161,13 +161,13 @@ stages:
         - Agent.OS -equals $(osName)
 
     steps:
-    - task: gitversion/setup@3.0.0
+    - task: gitversion/setup@3
       displayName: 'Install GitVersion..'
       inputs:
-        versionSpec: '6.x'
+        versionSpec: '6.0'
         preferLatestVersion: true
 
-    - task: gitversion/execute@3.0.0
+    - task: gitversion/execute@3
       displayName: 'Determine Version..'
       name: version_step
       inputs:
@@ -202,14 +202,14 @@ stages:
       displayName: 'Release to GitHub'
       inputs:
         gitHubConnection: 'github-packages-sqs'
-        repositoryName: 'siddiqsoft/asynchrony'
+        repositoryName: '$(Build.Repository.Name)'
         action: 'create'
         target: '$(Build.SourceVersion)'
         tagSource: 'userSpecifiedTag'
         tag: '$(GitVersion.MajorMinorPatch)'
         title: 'v$(GitVersion.MajorMinorPatch)'
         releaseNotesSource: 'inline'
-        releaseNotesInline: 'Documentation https://github.com/SiddiqSoft/asynchrony'
+        releaseNotesInline: 'Documentation https://github.com/$(Build.Repository.Name)'
         isPreRelease: true
         changeLogCompareToRelease: 'lastFullRelease'
         changeLogType: 'commitBased'

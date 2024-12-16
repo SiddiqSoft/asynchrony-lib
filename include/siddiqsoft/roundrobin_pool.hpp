@@ -36,6 +36,7 @@
 #ifndef ROUNDROBIN_POOL_HPP
 #define ROUNDROBIN_POOL_HPP
 
+#include <concepts>
 #include "simple_worker.hpp"
 
 
@@ -47,7 +48,7 @@ namespace siddiqsoft
     /// @remarks The number of threads in the pool is determined by the nature of your "work". If you're spending time against db
     /// then you might wish to use more threads as individual queries might take time and hog the thread.
     template <typename T, uint16_t N = 0>
-        requires std::move_constructible<T>
+        requires std::is_move_constructible_v<T>
     struct roundrobin_pool
     {
     public:
@@ -85,7 +86,7 @@ namespace siddiqsoft
             // Increment counter *before* we invoke nextWorkerIndex..
             ++queueCounter;
             // Add into the thread's internal queue
-            workers.at(nextWorkerIndex()).queue(std::move(item));
+            workers.at(nextWorkerIndex()).queue(std::forward<T>(item));
         }
 
 #if defined(NLOHMANN_JSON_VERSION_MAJOR)

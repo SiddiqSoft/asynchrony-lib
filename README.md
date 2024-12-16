@@ -12,7 +12,6 @@ asynchrony : Add asynchrony to your apps
 - The code here is a set of helpers that utilize the underlying deque, semaphore, mutex features found in std.
 - Be instructive while providing functional code
 - Use only C++20 standard code: jthread, deque, semaphore, barriers and latch
-- No external dependency
 
 # Usage
 
@@ -122,6 +121,7 @@ void main()
    std::this_thread::sleep_for(1s);
 }
 ```
+
 
 ## Implementation note
 In order to use `std::jthread` on Clang 18 and Clang 19, we enable the compiler flag `"CMAKE_CXX_FLAGS": "-fexperimental-library"` in the CMakeLists.txt. This option will show up in your client library under Clang compilers.

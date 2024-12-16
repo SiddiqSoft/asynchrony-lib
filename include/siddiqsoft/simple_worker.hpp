@@ -1,5 +1,5 @@
 /*
-    asynchrony-lib : Add asynchrony to your apps
+    asynchrony : Add asynchrony to your apps
 
     BSD 3-Clause License
 
@@ -45,6 +45,8 @@
 #include <deque>
 #include <semaphore>
 #include <stop_token>
+
+#include "siddiqsoft/RunOnEnd.hpp"
 
 
 namespace siddiqsoft
@@ -177,13 +179,15 @@ namespace siddiqsoft
         std::optional<T> getNextItem(std::chrono::milliseconds& delta)
         {
             if (signal.try_acquire_for(signalWaitInterval)) {
-                std::unique_lock<std::shared_mutex> myWriterLock(items_mutex);
                 // Guard against empty signals which are terminating indicator
-                if (!items.empty()) {
+                if (std::unique_lock<std::shared_mutex> myWriterLock(items_mutex); !items.empty()) {
+                    RunOnEnd onScopeExit([&]() { items.pop_front(); });
                     // WE require that the stored type by move-constructible!
-                    T item {std::move(items.front())};
-                    items.pop_front();
-                    return std::move(item);
+                    return std::move(items.front());
+                    // The pop_front() happens on scope exit
+                    // T item {std::move(items.front())};
+                    // items.pop_front();
+                    // return std::move(item);
                 }
             }
 
