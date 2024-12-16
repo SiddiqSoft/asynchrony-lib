@@ -41,22 +41,26 @@
 
 namespace siddiqsoft
 {
+    /**
+     * @brief Declare a callback that contains code run at end of this scope.
+     *
+     * @tparam Func A callable
+     */
     template <typename Func = std::function<void>>
+        requires std::is_move_constructible_v<Func>
     struct defer
     {
     private:
         Func callback;
 
     public:
+        /// @brief No default constructor
+        defer() = delete;
+        /// @brief Constructor requires a callback
         defer(Func&& f)
             : callback(std::move(f)) { };
-        ~defer()
-        {
-#if defined(DEBUG) || defined(_DEBUG)
-            std::cerr << "Invoking callback on exit..\n";
-#endif
-            callback();
-        }
+        /// @brief The destructor invokes the callback
+        ~defer() { callback(); }
     };
 
 } // namespace siddiqsoft
