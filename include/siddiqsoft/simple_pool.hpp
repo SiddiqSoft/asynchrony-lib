@@ -49,7 +49,7 @@ namespace siddiqsoft
     /// @remarks The number of threads in the pool is determined by the nature of your "work". If you're spending time against db
     /// then you might wish to use more threads as individual queries might take time and hog the thread.
     template <typename T, uint16_t N = 0>
-        requires std::move_constructible<T>
+        requires std::is_move_constructible<T>
     struct simple_pool
     {
         simple_pool(simple_pool&&)            = delete;
@@ -79,7 +79,7 @@ namespace siddiqsoft
         /// @brief Contructs a threadpool with N threads with the given callback/worker function
         /// @param c The worker function.
         simple_pool(std::function<void(T&&)> c)
-            : callback(c)
+            : callback(std::move(c))
         {
             // *CRITICAL*
             // This is step is *critical* otherwise we will end up moving threads as we add elements to the vector.
@@ -165,9 +165,7 @@ namespace siddiqsoft
         {
             if (signal.try_acquire_for(signalWaitInterval)) {
                 // Guard against empty signals which are terminating indicator
-                std::unique_lock<std::shared_mutex> myWriterLock(items_mutex);
-                // Guard against empty signals which are terminating indicator
-                if (!items.empty()) {
+                if (std::unique_lock<std::shared_mutex> myWriterLock(items_mutex); !items.empty()) {
                     // WE require that the stored type by move-constructible!
                     T item {std::move(items.front())};
                     items.pop_front();

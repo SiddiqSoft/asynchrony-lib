@@ -45,6 +45,7 @@
 #include <deque>
 #include <semaphore>
 #include <stop_token>
+#include <utility>
 
 
 namespace siddiqsoft
@@ -89,11 +90,11 @@ namespace siddiqsoft
         /// @param interval The interval between each invocation
         periodic_worker(std::function<void()>     c,
                         std::chrono::microseconds interval,
-                        const std::string&        name = {"anonymous-periodic-worker"})
-            : callback(c)
+                        std::string         name = {"anonymous-periodic-worker"})
+            : callback(std::move(c))
             , outstandingCallback(0)
             , invokePeriod(interval)
-            , threadName(name)
+            , threadName(std::move(name))
         {
         }
 

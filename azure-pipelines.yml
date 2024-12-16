@@ -62,13 +62,13 @@ stages:
         versionSpec: '>=6.0.0-0'
         checkLatest: true
 
-    - task: gitversion/setup@3.0.0
+    - task: gitversion/setup@3
       displayName: 'Install GitVersion..'
       inputs:
-        versionSpec: '6.x'
+        versionSpec: '6.0'
         preferLatestVersion: true
 
-    - task: gitversion/execute@3.0.0
+    - task: gitversion/execute@3
       displayName: 'Determine Version..'
       name: version_step
       inputs:
@@ -161,13 +161,13 @@ stages:
         - Agent.OS -equals $(osName)
 
     steps:
-    - task: gitversion/setup@3.0.0
+    - task: gitversion/setup@3
       displayName: 'Install GitVersion..'
       inputs:
-        versionSpec: '6.x'
+        versionSpec: '6.0'
         preferLatestVersion: true
 
-    - task: gitversion/execute@3.0.0
+    - task: gitversion/execute@3
       displayName: 'Determine Version..'
       name: version_step
       inputs:
@@ -202,14 +202,14 @@ stages:
       displayName: 'Release to GitHub'
       inputs:
         gitHubConnection: 'github-packages-sqs'
-        repositoryName: 'siddiqsoft/asynchrony'
+        repositoryName: '$(Build.Repository.Name)'
         action: 'create'
         target: '$(Build.SourceVersion)'
         tagSource: 'userSpecifiedTag'
         tag: '$(GitVersion.MajorMinorPatch)'
         title: 'v$(GitVersion.MajorMinorPatch)'
         releaseNotesSource: 'inline'
-        releaseNotesInline: 'Documentation https://github.com/SiddiqSoft/asynchrony'
+        releaseNotesInline: 'Documentation https://github.com/$(Build.Repository.Name)'
         isPreRelease: true
         changeLogCompareToRelease: 'lastFullRelease'
         changeLogType: 'commitBased'
