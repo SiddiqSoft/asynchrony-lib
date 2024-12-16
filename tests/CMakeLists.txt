@@ -30,7 +30,6 @@ if(${${PROJECT_NAME}_BUILD_TESTS})
                     ${PROJECT_SOURCE_DIR}/tests/periodic_worker.cpp
                     ${PROJECT_SOURCE_DIR}/tests/roundrobin_pool.cpp
                     ${PROJECT_SOURCE_DIR}/tests/simple_pool.cpp
-                    ${PROJECT_SOURCE_DIR}/tests/defer.cpp
                     ${PROJECT_SOURCE_DIR}/tests/simple_worker.cpp)
 
     # Dependencies
@@ -38,7 +37,9 @@ if(${${PROJECT_NAME}_BUILD_TESTS})
     target_link_libraries(${TESTPROJ} PRIVATE GTest::gtest_main)
     cpmaddpackage("gh:nlohmann/json#v3.11.3")
     target_link_libraries(${TESTPROJ} PRIVATE nlohmann_json::nlohmann_json)
-
+    cpmaddpackage("gh:siddiqsoft/runonend")
+    target_link_libraries(${TESTPROJ} PRIVATE runonend::runonend)
+    
     include(GoogleTest)
     gtest_discover_tests(${TESTPROJ} XML_OUTPUT_DIR "${PROJECT_SOURCE_DIR}/tests/results")
 
