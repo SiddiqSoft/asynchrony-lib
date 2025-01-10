@@ -6,7 +6,7 @@
 #   BUILD_TESTS ON
 #   CI_BUILDID must be set to the gitversion
 # 
-cmake_minimum_required(VERSION 3.25)
+cmake_minimum_required(VERSION 3.29)
 
 # _________________
 # Version detection; must preceed the declaration of the actual project()
@@ -22,11 +22,6 @@ project(asynchrony
         HOMEPAGE_URL    "%%myurl%%"
         DESCRIPTION     "Classes to allow you to build asynchrony in your applications using standard C++ jthread, semaphore, deque")
 
-
-# ____________________________________
-# Options; define and declare defaults
-option(${PROJECT_NAME}_BUILD_TESTS "${PROJECT_NAME} - Build tests. Uncheck for install only runs" OFF)
-option(${${PROJECT_NAME}_BUILD_TESTS} "${PROJECT_NAME} - Build tests. Uncheck for install only runs" OFF)
 
 # ____________________________________
 #  Library Definition

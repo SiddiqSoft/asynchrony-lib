@@ -30,6 +30,7 @@ if(${${PROJECT_NAME}_BUILD_TESTS})
                     ${PROJECT_SOURCE_DIR}/tests/periodic_worker.cpp
                     ${PROJECT_SOURCE_DIR}/tests/roundrobin_pool.cpp
                     ${PROJECT_SOURCE_DIR}/tests/simple_pool.cpp
+                    ${PROJECT_SOURCE_DIR}/tests/resource_pool.cpp
                     ${PROJECT_SOURCE_DIR}/tests/simple_worker.cpp)
 
     # Dependencies (specifically and only for the tests program)
