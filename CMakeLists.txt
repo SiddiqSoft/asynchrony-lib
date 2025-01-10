@@ -22,6 +22,9 @@ project(asynchrony
         HOMEPAGE_URL    "%%myurl%%"
         DESCRIPTION     "Classes to allow you to build asynchrony in your applications using standard C++ jthread, semaphore, deque")
 
+# ____________________________________
+# Options; define and declare defaults
+option(${PROJECT_NAME}_BUILD_TESTS "${PROJECT_NAME} - Build tests. Uncheck for install only runs" OFF)
 
 # ____________________________________
 #  Library Definition
