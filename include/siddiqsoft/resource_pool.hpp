@@ -49,10 +49,11 @@ namespace siddiqsoft
      * @brief Implements a resource pool that stores objects of type T.
      *        Said objects can be shared_ptr or unique_ptr
      *        Client "acquire" and "release" T from this pool.
+     *        The capacity of this pool should be kept at
+     *        the same value as std::thread::hardware_concurrency()
      * @tparam T The storage element type. Maybe shared_ptr or unique_ptr
-     * @tparam Sz The capacity of the pool. If this clients continually starve
-     *            then this value must be increased. Usually a perfect number
-     *            is the core-count on your host.
+     *         The only requirement is that the underlying object is move-constructible!
+     * 
      */
     template <typename T>
         requires std::move_constructible<T>
@@ -88,7 +89,7 @@ namespace siddiqsoft
             return size_t(0);
         }
 
-        [[nodiscard]] T&& checkout() /* throw() */
+        [[nodiscard]] T checkout() /* throw() */
         {
             if (std::lock_guard<std::recursive_mutex> l(_poolLock); !_pool.empty()) {
                 RunOnEnd roe([&]() { _pool.pop_front(); });
