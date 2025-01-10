@@ -122,6 +122,21 @@ void main()
 }
 ```
 
+## Resource Pool
+
+Provides a basic resource pool useful for keeping a pool of connection objects for the various threadpools to checkout/checkin.
+
+```cpp
+namespace siddiqsoft {
+    template<typename T>
+    class resource_pool {
+        public:
+        auto getCapacity();
+        [[nodiscard]] T checkout(); /* throw() */
+        void checkin(T&& rsrc);
+    };
+}
+```
 
 ## Implementation note
 In order to use `std::jthread` on Clang 18 and Clang 19, we enable the compiler flag `"CMAKE_CXX_FLAGS": "-fexperimental-library"` in the CMakeLists.txt. This option will show up in your client library under Clang compilers.
