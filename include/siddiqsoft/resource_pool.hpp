@@ -33,10 +33,10 @@
  */
 
 #pragma once
-#include <stdexcept>
 #ifndef RESOURCE_POOL_HPP
 #define RESOURCE_POOL_HPP
 
+#include <stdexcept>
 #include <mutex>
 #include <shared_mutex>
 #include <deque>
@@ -72,15 +72,17 @@ namespace siddiqsoft
 
         ~resource_pool()
         {
+            clear();
+        }
+
+        void clear()
+        {
             if (std::lock_guard<std::recursive_mutex> l(_poolLock); !_pool.empty()) {
                 _pool.clear();
             }
         }
 
-#if defined(NLOHMANN_JSON_VERSION_MAJOR)
-#endif
-
-        auto getCapacity()
+        auto size()
         {
             if (std::lock_guard<std::recursive_mutex> l(_poolLock); !_pool.empty()) {
                 return _pool.size();
