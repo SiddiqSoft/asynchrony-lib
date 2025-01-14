@@ -51,7 +51,7 @@ TEST(resource_pool, T_int)
 
     EXPECT_NO_THROW({
         siddiqsoft::resource_pool<int> rp {};
-        std::cerr << std::format("{} - Capacity:{}\n", __func__, rp.getCapacity());
+        std::cerr << std::format("{} - Capacity:{}\n", __func__, rp.size());
         passTest = true;
     });
 
@@ -65,24 +65,24 @@ TEST(resource_pool, T_shared_ptr_string)
     EXPECT_NO_THROW({
         siddiqsoft::resource_pool<std::shared_ptr<std::string>> rp {};
 
-        EXPECT_EQ(0, rp.getCapacity());
+        EXPECT_EQ(0, rp.size());
         rp.checkin(std::shared_ptr<std::string>(new std::string(__TIME__)));
-        EXPECT_EQ(1, rp.getCapacity());
+        EXPECT_EQ(1, rp.size());
 
         auto item = rp.checkout();
-        EXPECT_EQ(0, rp.getCapacity());
+        EXPECT_EQ(0, rp.size());
         EXPECT_EQ(__TIME__, *item);
         (*item).append("-ok");
 
         rp.checkin(std::move(item));
-        EXPECT_EQ(1, rp.getCapacity());
+        EXPECT_EQ(1, rp.size());
 
         auto item2 = rp.checkout();
-        EXPECT_EQ(0, rp.getCapacity());
+        EXPECT_EQ(0, rp.size());
         EXPECT_TRUE(item2->ends_with("-ok"));
 
         rp.checkin(std::move(item2));
-        EXPECT_EQ(1, rp.getCapacity());
+        EXPECT_EQ(1, rp.size());
 
         passTest = true;
     });
@@ -98,24 +98,24 @@ TEST(resource_pool, T_unique_ptr_string)
     EXPECT_NO_THROW({
         siddiqsoft::resource_pool<std::unique_ptr<std::string>> rp {};
 
-        EXPECT_EQ(0, rp.getCapacity());
+        EXPECT_EQ(0, rp.size());
         rp.checkin(std::unique_ptr<std::string>(new std::string(__TIME__)));
-        EXPECT_EQ(1, rp.getCapacity());
+        EXPECT_EQ(1, rp.size());
 
         auto item = rp.checkout();
-        EXPECT_EQ(0, rp.getCapacity());
+        EXPECT_EQ(0, rp.size());
         EXPECT_EQ(__TIME__, *item);
         (*item).append("-ok");
 
         rp.checkin(std::move(item));
-        EXPECT_EQ(1, rp.getCapacity());
+        EXPECT_EQ(1, rp.size());
 
         auto item2 = rp.checkout();
-        EXPECT_EQ(0, rp.getCapacity());
+        EXPECT_EQ(0, rp.size());
         EXPECT_TRUE(item2->ends_with("-ok"));
 
         rp.checkin(std::move(item2));
-        EXPECT_EQ(1, rp.getCapacity());
+        EXPECT_EQ(1, rp.size());
 
         passTest = true;
     });
@@ -130,17 +130,17 @@ TEST(resource_pool, T_checkin_checkout_unique_ptr_string)
     EXPECT_NO_THROW({
         siddiqsoft::resource_pool<std::unique_ptr<std::string>> rp {};
 
-        EXPECT_EQ(0, rp.getCapacity());
+        EXPECT_EQ(0, rp.size());
         rp.checkin(std::unique_ptr<std::string>(new std::string(__TIME__)));
-        EXPECT_EQ(1, rp.getCapacity());
+        EXPECT_EQ(1, rp.size());
 
         // Immediately push back in.. we're testing to make sure that there is
         // no leakage!
         rp.checkin(rp.checkout());
-        EXPECT_EQ(1, rp.getCapacity());
+        EXPECT_EQ(1, rp.size());
 
         auto item2 = rp.checkout();
-        EXPECT_EQ(0, rp.getCapacity());
+        EXPECT_EQ(0, rp.size());
         EXPECT_EQ(__TIME__, *item2);
 
         passTest = true;
@@ -158,20 +158,20 @@ TEST(resource_pool, T_checkin_checkout_vector_string)
     EXPECT_NO_THROW({
         siddiqsoft::resource_pool<std::vector<std::string>> rp {};
 
-        EXPECT_EQ(0, rp.getCapacity());
+        EXPECT_EQ(0, rp.size());
         rp.checkin({"A", "B", "C"});
-        EXPECT_EQ(1, rp.getCapacity());
+        EXPECT_EQ(1, rp.size());
 
         // Immediately push back in.. we're testing to make sure that there is
         // no leakage!
         rp.checkin(rp.checkout());
-        EXPECT_EQ(1, rp.getCapacity());
+        EXPECT_EQ(1, rp.size());
 
         auto item2 = rp.checkout();
         item2.push_back("1");
         item2.push_back("2");
         item2.push_back("3");
-        EXPECT_EQ(0, rp.getCapacity());
+        EXPECT_EQ(0, rp.size());
         EXPECT_EQ(6, item2.size());
 
         rp.checkin(std::move(item2));
